@@ -227,5 +227,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\PdfiumViewer.WPF\src\PdfiumViewer\PdfiumViewer.csproj">
+      <Project>{60d3c75c-e71d-4116-bd7e-cac68c4dd96b}</Project>
+      <Name>PdfiumViewer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
