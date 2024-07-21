@@ -1,0 +1,115 @@
+﻿<UserControl x:Class="PdfiumPreViewer.PreViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:PdfiumPreViewer"
+             xmlns:controls="clr-namespace:PdfiumPreViewer.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.InputBindings>
+        <!--<KeyBinding Key="F"
+                    Modifiers="Control"
+                    Command="{Binding ElementName=Viewer}" />-->
+    </UserControl.InputBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ToolBar Style="{DynamicResource CostumeToolBar}" Grid.Row="0"
+                 ToolBarTray.IsLocked="True">
+            <ToolBar.Resources>
+                <Style TargetType="Image">
+                    <Setter Property="Height" Value="25"/>
+                </Style>
+                <Style TargetType="{x:Type ToolBarPanel}">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                </Style>
+            </ToolBar.Resources>
+
+            <ToggleButton x:Name="SearchButton" ToolTip="חיפוש"
+                          IsChecked="{Binding ElementName=SearchPopUp, Path=IsOpen}">
+                <Image Source="Resources/find.png" />
+            </ToggleButton>
+            
+            <ToggleButton ToolTip="גלילה באמצעות סמן העכבר"
+                          IsChecked="{Binding ElementName=Viewer, Path=IsHandToolsEnabled}">
+                <Image Source="Resources/hand_cursor.png" />
+            </ToggleButton>
+
+            <Separator/>
+            
+            <Button ToolTip="הגדל תצוגה" 
+                   Command="{Binding ElementName=Viewer, Path=ZoomInCommand}">
+                <Image Source="Resources/zoom_in.png" />
+            </Button>
+            <Button ToolTip="הקטן תצוגה"
+                    Command="{Binding ElementName=Viewer, Path=ZoomOutCommand}">
+                <Image Source="Resources/zoom_out.png"/>
+            </Button>
+
+            <Separator/>
+
+            <Button ToolTip="התאם תצוגה לרוחב העמוד"
+                    Command="{Binding ElementName=Viewer, Path=FitWidthCommand}">
+                <Image Source="Resources/fit_width.png" />
+            </Button>
+            <Button ToolTip="התאם תצוגה לגובה העמוד" 
+                     Command="{Binding ElementName=Viewer, Path=FitHeightCommand}">
+                <Image Source="Resources/fit_height.png" />
+            </Button>
+
+            <Separator/>
+            
+            <Button ToolTip="סובב לשמאל"
+                     Command="{Binding ElementName=Viewer, Path=RotateLeftCommand}">
+                <Image Source="Resources/rotate_left.png" />
+            </Button>
+            <Button ToolTip="סובב לימין" 
+                     Command="{Binding ElementName=Viewer, Path=RotateRightCommand}">
+                <Image Source="Resources/rotate_right.png" />
+            </Button>
+
+            <controls:CostumePopup x:Name="SearchPopUp"
+                StaysOpen="False"
+                Placement="Bottom"
+               PlacementTarget="{Binding RelativeSource={RelativeSource AncestorType=ToolBar}}"
+                PopupAnimation="Slide"
+                FocusTarget="{Binding ElementName=SearchTextBox}">
+
+                <Border  HorizontalAlignment="Center" 
+                       Background="WhiteSmoke" BorderBrush="LightGray" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect/>
+                    </Border.Effect>
+                    
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+
+                        <TextBox x:Name="SearchTextBox" Height="20" Width="200"  
+                          VerticalAlignment="Center" VerticalContentAlignment="Center" 
+                          HorizontalAlignment="Left"  Margin="5,0,5,0"
+                          Text="{Binding ElementName=Viewer, Path=SearchTerm, UpdateSourceTrigger=PropertyChanged}">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Return" Command="{Binding ElementName=Viewer, Path=SearchCommand}" />
+                            </TextBox.InputBindings>
+                        </TextBox>
+
+                        <Button ToolTip="הקודם" Background="Transparent" BorderThickness="0" Width="30"
+                                Command="{Binding ElementName=Viewer, Path=SearchPreviousCommand}">
+                            <Image Source="Resources/prev.png" />
+                        </Button>
+                        <Button ToolTip="הבא" Background="Transparent" BorderThickness="0" Width="30"
+                                 Command="{Binding ElementName=Viewer, Path=SearchNextCommand}" >
+                            <Image Source="Resources/next.png" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </controls:CostumePopup>
+        </ToolBar>
+
+        <local:PdfPreViewer x:Name="Viewer"
+                            Grid.Row="1"/>
+    </Grid>
+</UserControl>

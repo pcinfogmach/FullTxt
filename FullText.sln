@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34723.18
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullText", "FullText\FullText.csproj", "{0D31152C-B34A-4ABD-AC4F-B16A24BBFBB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumPreViewer", "PdfiumPreViewer\PdfiumPreViewer.csproj", "{4C5E527D-D16D-4752-A537-6822977FFB21}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D31152C-B34A-4ABD-AC4F-B16A24BBFBB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D31152C-B34A-4ABD-AC4F-B16A24BBFBB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D31152C-B34A-4ABD-AC4F-B16A24BBFBB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D31152C-B34A-4ABD-AC4F-B16A24BBFBB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C5E527D-D16D-4752-A537-6822977FFB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C5E527D-D16D-4752-A537-6822977FFB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C5E527D-D16D-4752-A537-6822977FFB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C5E527D-D16D-4752-A537-6822977FFB21}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E45A378-E798-457B-B37F-5456DC8A5C75}
+	EndGlobalSection
+EndGlobal
