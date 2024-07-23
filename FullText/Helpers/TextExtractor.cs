@@ -4,57 +4,34 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using WordInterop = Microsoft.Office.Interop.Word;
 
 namespace FullText.Helpers
 {
-    public class TextExtractor: IDisposable
+    public static class TextExtractor
     {
-        string[] MsWordExtensions = { ".doc", ".docm", ".docx", ".dotx", ".dotm", ".dot", ".odt", ".rtf" };
-        WordInterop.Application wordApp;
+        static string[] MsWordExtensions = { ".doc", ".docm", ".docx", ".dotx", ".dotm", ".dot", ".odt", ".rtf" };
 
-        public TextExtractor() 
-        {
-            //wordApp = Process.GetProcessesByName("");
-            try { wordApp = new WordInterop.Application(); } catch { }      
-        }
-
-        public void Dispose()
-        {
-            try { wordApp.Quit(); } catch { }
-        }
-
-        public string ReadText(string filePath)
+        public static string ReadText(string filePath)
         {
             string content = string.Empty;
             string extension = Path.GetExtension(filePath);
             if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) {  content = PdfiumExtractor(filePath); }
-            else if (MsWordExtensions.Contains(extension)) { }
+            else if (MsWordExtensions.Contains(extension)) { content = MsWordExtractor(filePath); }
             else { content = TikaTextExtractor(filePath); }
             return content;
         }
 
-        string MsWordExtractor(string filePath)
+        static string MsWordExtractor(string filePath)
         {
-            string content = string.Empty;
-            string tempHtmlPath = Path.Combine(Path.GetTempPath(), filePath + "FullTextExtractor.html");
-            try
-            {
-                WordInterop.Document wordDoc = wordApp.Documents.Open(filePath);
-                wordDoc.SaveAs2(tempHtmlPath, WordInterop.WdSaveFormat.wdFormatFilteredHTML);
-                wordDoc.Close(false);
-                content = File.ReadAllText(tempHtmlPath);
-            }
-            catch
-            {
-                content = TikaTextExtractor(filePath);
-            }
-            return content;
+            string tempPath = WordToHtmlConverter.Convert(filePath);
+            return TikaTextExtractor(tempPath);
         }
-  
-        string PdfiumExtractor(string filePath)
+
+        static string PdfiumExtractor(string filePath)
         {
             try
             {
@@ -72,7 +49,7 @@ namespace FullText.Helpers
             }
         }
 
-        string TikaTextExtractor(string filePath)
+       public static string TikaTextExtractor(string filePath)
         {
             try { return new TikaOnDotNet.TextExtraction.TextExtractor().Extract(filePath).Text; }
             catch { return string.Empty; }

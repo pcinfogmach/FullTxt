@@ -1,8 +1,10 @@
-﻿using FullText.Search;
+﻿using FullText.Helpers;
+using FullText.Search;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +15,6 @@ namespace FullText.Controls
 {
     internal class ResultsWebView : WebView2
     {
-
         public static readonly DependencyProperty ResultProperty =
                     DependencyProperty.Register("Result", typeof(ResultItem), typeof(ResultsWebView), new PropertyMetadata(new ResultItem(), OnResultChanged));
 
@@ -22,8 +23,6 @@ namespace FullText.Controls
             get { return (ResultItem)GetValue(ResultProperty); }
             set { SetValue(ResultProperty, value); }
         }
-
-        bool isRunning;
 
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -34,12 +33,23 @@ namespace FullText.Controls
         public async void LoadResult()
         {
             if (Result == null) { return; }
+            
             this.Visibility = Visibility.Hidden;
             Source = new Uri("about:blank");
-            Source = new Uri(Result.TreeNode.Path);
-            if (Result.TreeNode.Name.ToLower().EndsWith(".pdf")) { this.Visibility = Visibility.Visible; return; }
-            await EnsureCoreWebView2Async(null);
 
+            string[] MsWordExtensions = { ".doc", ".docm", ".docx", ".dotx", ".dotm", ".dot", ".odt", ".rtf" };
+            string extension = Path.GetExtension(Result.TreeNode.Name);
+
+            if (MsWordExtensions.Contains(extension))
+            {
+                string tempPath = WordToHtmlConverter.Convert(Result.TreeNode.Path);
+                Source = new Uri(tempPath); 
+            }
+            else { Source = new Uri(Result.TreeNode.Path); }
+
+            if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) { this.Visibility = Visibility.Visible; return; }         
+            
+            await EnsureCoreWebView2Async(null);
             CoreWebView2.DOMContentLoaded += CoreWebView2_DOMContentLoaded;
         }
 
@@ -62,6 +72,10 @@ namespace FullText.Controls
             if (lineContainingMarkedText != null)
             {
                 await FindTextAsync(lineContainingMarkedText);
+            }
+            else
+            {
+                await FindTextAsync(markedText);
             }
         }
 

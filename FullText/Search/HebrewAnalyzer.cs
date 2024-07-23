@@ -3,12 +3,7 @@ using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Analysis.TokenAttributes;
 using Lucene.Net.Analysis;
 using Lucene.Net.Util;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 
 namespace FullText.Search
@@ -27,6 +22,11 @@ namespace FullText.Search
             filter = new LowerCaseFilter(version, filter);
             filter = new StopFilter(version, filter, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
             return new TokenStreamComponents(tokenizer, filter);
+        }
+
+        protected override TextReader InitReader(string fieldName, TextReader reader)
+        {
+            return new HtmlStrippingCharFilter(reader);
         }
 
         sealed class HebrewTokenFilter : TokenFilter

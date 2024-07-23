@@ -51,6 +51,8 @@
     </Style>
 
     <Style x:Key="VerticalTabControl" TargetType="TabControl">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush"  Value="LightGray"/>
         <Setter Property="TabStripPlacement" Value="Left" />
         <Style.Resources>
             <Style TargetType="TabItem">
@@ -92,7 +94,9 @@
                      Margin="0,0,0,1"
                      VerticalAlignment="Center"
                      FontWeight="Bold"
-                     Text="{Binding TreeNode.Name}" />
+                     TextWrapping="WrapWithOverflow"
+                     Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Path=ActualWidth, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource SubtractConverter}}"
+                     Text="{Binding TreeNode.Name}"/>
                     <controls:HighLightTextBlock
                      Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Path=ActualWidth, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource SubtractConverter}}"
                      VerticalAlignment="Center"

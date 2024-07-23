@@ -16,13 +16,23 @@ using System.Windows.Shapes;
 namespace FullText
 {
     /// <summary>
-    /// Interaction logic for FullTextView.xaml
+    /// Interaction logic for FullTxtView.xaml
     /// </summary>
-    public partial class FullTextView : UserControl
+    public partial class FullTxtView : UserControl
     {
-        public FullTextView()
+        public FullTxtView()
         {
             InitializeComponent();
+            Loaded += (s, e) => { SearchTextBox.Focus(); };
+        }
+
+        private void SearchTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var txtControl = sender as TextBox;
+            txtControl.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                txtControl.SelectAll();
+            }));
         }
     }
 }

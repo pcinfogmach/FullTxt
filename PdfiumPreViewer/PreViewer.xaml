@@ -110,6 +110,7 @@
         </ToolBar>
 
         <local:PdfPreViewer x:Name="Viewer"
+                            x:FieldModifier="public"
                             Grid.Row="1"/>
     </Grid>
 </UserControl>

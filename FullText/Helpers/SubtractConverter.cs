@@ -14,7 +14,7 @@ namespace FullText.Helpers
         {
             if (value is double baseValue)
             {
-                return baseValue - 35; // Subtracting 10 from baseValue
+                return baseValue - 30; // Subtracting from baseValue
             }
             return value; // Return the original value if it's not a double
         }

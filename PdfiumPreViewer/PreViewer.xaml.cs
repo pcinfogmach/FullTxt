@@ -23,7 +23,6 @@ namespace PdfiumPreViewer
         public PreViewer()
         {
             InitializeComponent();
-            Viewer.FileName = "C:\\Users\\Admin\\Desktop\\TextSeekersTests\\Pdf\\הגדה של פסח מדרש הגדה להמלבי''ם.pdf";
         }
     }
 }

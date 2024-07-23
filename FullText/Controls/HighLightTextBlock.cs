@@ -47,7 +47,7 @@ namespace FullText.Controls
                 // Add highlighted text
                 if (match.Groups[1].Success)
                 {
-                    Inlines.Add(new Run(match.Groups[1].Value) { Background = Brushes.Yellow });
+                    Inlines.Add(new Run(match.Groups[1].Value) { Foreground = Brushes.Magenta });
                 }
 
                 lastPos = match.Index + match.Length;

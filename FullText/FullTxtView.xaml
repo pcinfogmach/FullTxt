@@ -1,0 +1,145 @@
+﻿<UserControl x:Class="FullText.FullTxtView"
+                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:FullText"
+             xmlns:controls="clr-namespace:FullText.Controls"
+             mc:Ignorable="d"
+             Background="#FFF3F3F3"
+             FlowDirection="RightToLeft"
+             d:Height="400" d:Width="650"
+             Padding="5">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/DropDownDictionary.xaml"/>
+                <ResourceDictionary Source="Themes/FullTextViewDictionary.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <local:FullTxtViewModel x:Name="viewModel"/>
+    </UserControl.DataContext>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border x:Name="SearchPanel" Grid.Row="0" Background="White" IsEnabled="{Binding SearchIsEnabled}"
+                FlowDirection="LeftToRight">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox x:Name="SearchTextBox" Grid.Column="1" FlowDirection="{Binding TextBoxFlowDirection}"
+                         BorderThickness="0" VerticalAlignment="Center" Margin="2,0,2,0"
+                         GotKeyboardFocus="SearchTextBox_GotKeyboardFocus"
+                         Text="{Binding SearchTerm , UpdateSourceTrigger=PropertyChanged, BindsDirectlyToSource=True, Mode=TwoWay}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Return" Command="{Binding SearchCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Column="0">
+                    <ComboBox Template="{DynamicResource DropDownStyle}" x:Name="SearchHistoryComboBox"
+                              ItemsSource="{Binding RecentSearchCollection}" 
+                              SelectedIndex="{Binding RecentSearchSelectedIndex}"/>
+                    <Grid>
+                        <Button x:Name="SearchButton" Command="{Binding SearchCommand}">
+                            <Image Source="{Binding SearchButtonImage}"  Width="15"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <ProgressBar Grid.Row="1" Height="5" 
+                IsIndeterminate="{Binding IsSearchInProgress}"/>
+
+        <Grid Grid.Row="2">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+
+            <TabControl x:Name="SidePanelTabControl" Grid.Column="0"
+                        Style="{StaticResource VerticalTabControl}"
+                        SelectedIndex="{Binding SelectedTabIndex}">
+                
+                <TabItem Header="תוצאות חיפוש">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                        <ListView  x:Name="SearchResultsListView" Grid.Row="1"
+                                   Style="{StaticResource ResultsListView}"
+                                   ItemsSource="{Binding SearchResults}"
+                                   SelectedIndex="{Binding SearchResultsSelectedIndex}">
+                        </ListView>
+                    </Grid>
+            </TabItem>
+                
+            <TabItem Header="אינדקס">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal">
+                            <Button x:Name="AddTreeItem" ToolTip="הוסף תיקייה לאינדקס"
+                                    Command="{Binding AddNewNodeCommand}">
+                                <Image Source="/Resources/AddFolderIcon.png" />
+                            </Button>
+                            <Button x:Name="RemoveTreeItem" ToolTip="הסר תיקייה מהאינדקס"
+                                    Command="{Binding RemoveSelectedNodeCommand}">
+                                <Image Source="/Resources/DeleteFolderIcon.png" />
+                            </Button>
+                        </StackPanel>
+
+                        <ProgressBar Grid.Row="1" Height="5" 
+                                     IsIndeterminate="{Binding IsIndexingInProgress}"/>
+                        
+                        <TreeView Style="{StaticResource CheckedImageTreeView}" 
+                                  ItemsSource="{Binding RootNode.Children}"
+                                  Grid.Row="2" BorderThickness="0">
+                            <TreeView.InputBindings>
+                                <KeyBinding Key="Delete" Command="{Binding RemoveSelectedNodeCommand}"/>
+                            </TreeView.InputBindings>
+                            <TreeView.Resources>
+                                <Style TargetType="TreeViewItem">
+                                    <Setter Property="IsSelected" Value="{Binding IsSelected}"/>
+                                </Style>
+                            </TreeView.Resources>
+                        </TreeView>
+                    </Grid>
+                
+                </TabItem>
+            <TabItem Header="הגדרות">
+
+            </TabItem>
+        </TabControl>
+
+        <GridSplitter Grid.Column="1"/>
+            <TabControl Style="{StaticResource TabLessTabControl}"  Grid.Column="2">
+                <TabItem>
+                    <controls:ResultsViewer x:Name="Previewer"
+                                           Result="{Binding CurrentResultItem}"/>
+                </TabItem>
+                <TabItem>
+                </TabItem>
+            </TabControl>
+           
+        </Grid>
+    </Grid>
+</UserControl>
+

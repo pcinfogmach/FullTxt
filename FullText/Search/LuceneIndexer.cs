@@ -32,7 +32,6 @@ namespace FullText.Search
 
         public void IndexFiles(List<string> files)
         {
-            using (TextExtractor textExtractor = new TextExtractor())
             using (var directory = FSDirectory.Open(new DirectoryInfo(indexPath)))
             {
                 var indexConfig = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
@@ -41,7 +40,7 @@ namespace FullText.Search
                     Parallel.ForEach(files, (file) =>
                     {
                         string id = idRegex.Replace(file, "");
-                        string content = textExtractor.ReadText(file).RemoveEmptyLines();
+                        string content = TextExtractor.ReadText(file).RemoveEmptyLines();
                         var doc = new Document
                         {
                             new StringField("Path", file, Field.Store.YES),

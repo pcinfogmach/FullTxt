@@ -10,7 +10,7 @@ using PdfiumViewer.Enums;
 
 namespace PdfiumPreViewer
 {
-    internal class PdfPreViewer : PdfRenderer
+    public class PdfPreViewer : PdfRenderer
     {
         public PdfSearchManager SearchManager;
         string lastSearchTerm; // Field to store the last search term
@@ -20,12 +20,12 @@ namespace PdfiumPreViewer
             SearchManager = new PdfSearchManager(this);
         }
 
-        public static readonly DependencyProperty ImmidiateSearchTermProperty =
+        public static readonly DependencyProperty InitialeSearchTermProperty =
             DependencyProperty.Register(
-                nameof(ImmidiateSearchTerm),
+                nameof(InitialeSearchTerm),
                 typeof(string),
                 typeof(PdfPreViewer),
-                new PropertyMetadata(string.Empty, OnImmidiateSearchTermChanged));
+                new PropertyMetadata(string.Empty, OnInitialeSearchTermChanged));
 
         public static readonly DependencyProperty SearchTermProperty =
             DependencyProperty.Register(
@@ -34,12 +34,12 @@ namespace PdfiumPreViewer
                 typeof(PdfPreViewer),
                 new PropertyMetadata(string.Empty));
 
-        public static readonly DependencyProperty FileNameProperty =
+        public static readonly DependencyProperty FilePathProperty =
            DependencyProperty.Register(
-               nameof(FileName),
+               nameof(FilePath),
                typeof(string),
                typeof(PdfPreViewer),
-               new PropertyMetadata(string.Empty, OnFileNameChanged));
+               new PropertyMetadata(string.Empty, OnFilePathChanged));
 
         public static readonly DependencyProperty IsHandToolsEnabledProperty =
            DependencyProperty.Register(
@@ -49,10 +49,10 @@ namespace PdfiumPreViewer
                new PropertyMetadata(false, OnIsHandToolsEnabledChanged));
 
 
-        public string ImmidiateSearchTerm
+        public string InitialeSearchTerm
         {
-            get => (string)GetValue(ImmidiateSearchTermProperty);
-            set => SetValue(ImmidiateSearchTermProperty, value);
+            get => (string)GetValue(InitialeSearchTermProperty);
+            set => SetValue(InitialeSearchTermProperty, value);
         }
 
         public string SearchTerm
@@ -61,10 +61,10 @@ namespace PdfiumPreViewer
             set => SetValue(SearchTermProperty, value);
         }
         
-        public string FileName
+        public string FilePath
         {
-            get => (string)GetValue(FileNameProperty);
-            set => SetValue(FileNameProperty, value);
+            get => (string)GetValue(FilePathProperty);
+            set => SetValue(FilePathProperty, value);
         }
 
         public bool IsHandToolsEnabled
@@ -84,11 +84,13 @@ namespace PdfiumPreViewer
         public ICommand SearchPreviousCommand { get => new RelayCommand(() => SearchManager.FindNext(false)); }
 
 
-        private static void OnImmidiateSearchTermChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnInitialeSearchTermChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PdfPreViewer viewer)  
             {
-                viewer.SearchManager.Search((string)e.NewValue);
+                viewer.ZoomMode = PdfViewerZoomMode.FitWidth;
+                string searchTerm = (string)e.NewValue;
+                viewer.SearchManager.Search(searchTerm.Trim());
                 try { viewer.SearchManager.FindNext(true); } catch { }
             }
         }
@@ -103,7 +105,7 @@ namespace PdfiumPreViewer
             try { SearchManager.FindNext(true); } catch { }
         }
 
-        private static void OnFileNameChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnFilePathChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is PdfPreViewer viewer)
             {
