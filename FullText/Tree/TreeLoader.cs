@@ -43,6 +43,7 @@ namespace FullText.Tree
             {
                 FileTreeNode fileTreeNode = new FileTreeNode(file);
                 if (checkedFileNodes.Contains(file)) { fileTreeNode.IsChecked = true; }
+                else {  fileTreeNode.IsChecked = false; }
                 parentnode.AddChild(fileTreeNode);
                 rootNode.AllTreeNodes.Add(fileTreeNode);
             }

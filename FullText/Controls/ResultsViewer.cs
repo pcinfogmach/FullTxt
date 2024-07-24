@@ -32,7 +32,7 @@ namespace FullText.Controls
 
         public void LoadResult()
         {
-            if (Result == null)
+            if (Result == null || Result.TreeNode == null || string.IsNullOrEmpty(Result.Snippet))
             {
                 this.Content = null;
                 return;
@@ -52,7 +52,7 @@ namespace FullText.Controls
 
         void LoadPdfResult()
         {
-            pdfPrevIewer.Viewer.OpenPdf(new FileStream(Result.TreeNode.Path, FileMode.Open, FileAccess.Read, FileShare.Read));
+            pdfPrevIewer.Viewer.FilePath = Result.TreeNode.Path;
             this.Content = pdfPrevIewer;
 
             string snippet = Regex.Replace(Result.Snippet, @"</?mark>", "");
@@ -61,7 +61,6 @@ namespace FullText.Controls
 
             var lines = snippet.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             string lineContainingMarkedText = lines.FirstOrDefault(line => line.Contains(markedText));
-
 
             if (lineContainingMarkedText != null)
             {
