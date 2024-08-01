@@ -1,4 +1,5 @@
-﻿using FullText.Helpers;
+﻿using FullText.Controls;
+using FullText.Helpers;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -6,53 +7,91 @@ using Lucene.Net.QueryParsers.Simple;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Lucene.Net.Util;
+using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 
 namespace FullText.Search
 {
-    public  class LuceneIndexer
+    public class LuceneIndexer : LuceneBase
     {
-        public string indexPath;
-        public Analyzer analyzer;
-        public HebrewQueryParser parser;
         public Regex idRegex = new Regex(@"\W", RegexOptions.Compiled);
+        Queue<string> indexQueue = new Queue<string>();
+        bool isIndexerRunning;
 
-        public LuceneIndexer()
+        public async Task NewIndexingTask()
         {
-            indexPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "LuceneFullTextIndex");
-            if (!System.IO.Directory.Exists(indexPath)) { System.IO.Directory.CreateDirectory(indexPath); }
-            analyzer = new HebrewAnalyzer(LuceneVersion.LUCENE_48);
-            parser = new HebrewQueryParser(Lucene.Net.Util.LuceneVersion.LUCENE_48, "Content", analyzer);
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog { IsFolderPicker = true };
+            CommonFileDialogResult dialogResult = CommonFileDialogResult.None;
+            Application.Current.Dispatcher.Invoke(() => { dialogResult = dialog.ShowDialog();});
+            if (dialogResult != CommonFileDialogResult.Ok) { return; }
+
+            if (Properties.Settings.Default.RootFolderNodes.Contains(dialog.FileName))
+            {
+                var result = MessageBox.Show("תיקייה זו כבר קיימת באינדקס האם ברצונך לעדכן אותה?", "תיקייה קיימת", MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.Yes, MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading);
+                if (result == MessageBoxResult.Yes) { Properties.Settings.Default.NodeToChange = dialog.FileName; }
+                else { return; }
+            }
+
+            indexQueue.Enqueue(dialog.FileName);
+            if (!isIndexerRunning)
+            {
+                isIndexerRunning = true;
+                await ProcessQueueAsync();
+                isIndexerRunning = false;
+            }
         }
 
-        public void IndexFiles(List<string> files)
+
+        private async Task ProcessQueueAsync()
         {
+            while (indexQueue.Count > 0)
+            {
+                await IndexFilesAsync(indexQueue.Dequeue());
+            }
+        }
+
+        public async Task IndexFilesAsync(string directoryToIndex)
+        {
+            var files = System.IO.Directory.GetFiles(directoryToIndex, "*.*", System.IO.SearchOption.AllDirectories).ToList();
+            var progressReporter = ProgressDialog.Start($"מאנדקס את: {directoryToIndex}", files.Count);
             using (var directory = FSDirectory.Open(new DirectoryInfo(indexPath)))
             {
                 var indexConfig = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer);
                 using (var writer = new IndexWriter(directory, indexConfig))
                 {
-                    Parallel.ForEach(files, (file) =>
+                    var tasks = files.Select(async (file) =>
                     {
                         string id = idRegex.Replace(file, "");
-                        string content = TextExtractor.ReadText(file).RemoveEmptyLines();
+                        string content = TextExtractor.ReadText(file);
                         var doc = new Document
+                {
+                    new StringField("Path", file, Field.Store.YES),
+                    new StringField("Id", id, Field.Store.YES),
+                    new TextField("Content", content, Field.Store.YES)
+                };
+                        lock (writer)
                         {
-                            new StringField("Path", file, Field.Store.YES),
-                            new StringField("Id", id, Field.Store.YES),
-                            new TextField("Content", content, Field.Store.YES)
-                        };
-                        writer.UpdateDocument(new Term("Id", id), doc);  // Update the document if it exists, otherwise add it
+                            writer.UpdateDocument(new Term("Id", id), doc);  // Update the document if it exists, otherwise add it
+                        }
+
+                        progressReporter.Report(1);
                     });
+
+                    await Task.WhenAll(tasks);
                     writer.Flush(triggerMerge: true, applyAllDeletes: true);
                 }
             }
+
+            Properties.Settings.Default.NodeToChange = directoryToIndex;
+            progressReporter.Report(-1);
         }
+
 
         public void RemoveFiles(List<string> files)
         {

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace FullText.Tree
 {
@@ -42,11 +43,27 @@ namespace FullText.Tree
             foreach (var file in files)
             {
                 FileTreeNode fileTreeNode = new FileTreeNode(file);
-                if (checkedFileNodes.Contains(file)) { fileTreeNode.IsChecked = true; }
-                else {  fileTreeNode.IsChecked = false; }
                 parentnode.AddChild(fileTreeNode);
                 rootNode.AllTreeNodes.Add(fileTreeNode);
+                if (checkedFileNodes.Contains(file)) { fileTreeNode.IsChecked = true; }
             }
+        }
+
+        public void UpdateTree(RootTreeNode rootNode, string folderToChange)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var nodeToRemove = rootNode.Children.FirstOrDefault(node => node.Path == folderToChange);
+                if (nodeToRemove != null) { rootNode.RemoveChild(nodeToRemove); }
+                else
+                {
+                    FolderTreeNode folderTreeNode = new FolderTreeNode(folderToChange);
+                    rootNode.AddChild(folderTreeNode);
+                    rootNode.AllTreeNodes.Add(folderTreeNode);
+                    PopulateChildren(rootNode, folderTreeNode, new List<string>());
+                    folderTreeNode.IsChecked = true;
+                }
+            });                  
         }
     }
 }

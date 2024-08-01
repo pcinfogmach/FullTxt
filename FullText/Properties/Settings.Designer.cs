@@ -64,5 +64,29 @@ namespace FullText.Properties {
                 this["RecentSearchCollection"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public short DistanceBetweenSearchWords {
+            get {
+                return ((short)(this["DistanceBetweenSearchWords"]));
+            }
+            set {
+                this["DistanceBetweenSearchWords"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string NodeToChange {
+            get {
+                return ((string)(this["NodeToChange"]));
+            }
+            set {
+                this["NodeToChange"] = value;
+            }
+        }
     }
 }

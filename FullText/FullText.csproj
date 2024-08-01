@@ -181,6 +181,12 @@
     <Reference Include="Microsoft.WindowsAPICodePack.Shell, Version=1.1.5.0, Culture=neutral, PublicKeyToken=8985beaab7ea3f04, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft-WindowsAPICodePack-Shell.1.1.5\lib\net48\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
     </Reference>
+    <Reference Include="NumericUpDownLib, Version=3.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dirkster.NumericUpDownLib.3.4.0\lib\net40\NumericUpDownLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Ookii.Dialogs.Wpf, Version=5.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ookii.Dialogs.Wpf.5.0.1\lib\net462\Ookii.Dialogs.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationFramework.Aero2" />
     <Reference Include="Prism, Version=7.2.0.1422, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
       <HintPath>..\packages\Prism.Core.7.2.0.1422\lib\net45\Prism.dll</HintPath>
@@ -198,6 +204,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.1.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.3.0\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
@@ -286,6 +293,7 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Security" />
     <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Security.Cryptography.Algorithms.4.3.0\lib\net463\System.Security.Cryptography.Algorithms.dll</HintPath>
       <Private>True</Private>
@@ -344,12 +352,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\ProgressDialog.cs" />
     <Compile Include="Controls\ResultsViewer.cs" />
     <Compile Include="FullTxtView.xaml.cs">
       <DependentUpon>FullTxtView.xaml</DependentUpon>
     </Compile>
     <Compile Include="FullTxtViewModel.cs" />
+    <Compile Include="Helpers\BooleanToVisibilityConverter.cs" />
     <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Helpers\HebrewMessageBox.cs" />
     <Compile Include="Helpers\ICommandBase.cs" />
     <Compile Include="Helpers\InotifyBase.cs" />
     <Compile Include="Helpers\SubtractConverter.cs" />
@@ -358,7 +369,9 @@
     <Compile Include="Search\HebrewAnalyzer.cs" />
     <Compile Include="Search\HebrewQueryParser.cs" />
     <Compile Include="Search\HtmlStrippingCharFilter.cs" />
+    <Compile Include="Search\LuceneBase.cs" />
     <Compile Include="Search\LuceneIndexer.cs" />
+    <Compile Include="Search\InMemoryLuceneSearch.cs" />
     <Compile Include="Search\LuceneSearch.cs" />
     <Compile Include="Search\ResultItem.cs" />
     <Compile Include="Tree\TreeLoader.cs" />
@@ -471,6 +484,14 @@
     <Resource Include="Resources\StopIcon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\New Text Document.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\הוראות חיפוש מתקדם.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets')" />

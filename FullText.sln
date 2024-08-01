@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumPreViewer", "PdfiumPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfiumViewer", "..\PdfiumViewer.WPF\src\PdfiumViewer\PdfiumViewer.csproj", "{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextSeeker", "TextSeeker\TextSeeker.csproj", "{B0FE2B22-75AA-4305-B6AD-BA657BF5D31C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60D3C75C-E71D-4116-BD7E-CAC68C4DD96B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0FE2B22-75AA-4305-B6AD-BA657BF5D31C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0FE2B22-75AA-4305-B6AD-BA657BF5D31C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0FE2B22-75AA-4305-B6AD-BA657BF5D31C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0FE2B22-75AA-4305-B6AD-BA657BF5D31C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

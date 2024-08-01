@@ -11,7 +11,7 @@ namespace FullText.Tree
     public class RootTreeNode : TreeNode
     {
         public List<TreeNode> AllTreeNodes = new List<TreeNode>();
-        public RootTreeNode(string path) : base(path) { }
+        public RootTreeNode(string path) : base(path) {  }
     }
     public class FolderTreeNode : TreeNode { public FolderTreeNode(string path) : base(path) { } }
     public class FileTreeNode : TreeNode { public FileTreeNode(string path) : base(path) { } }
@@ -24,7 +24,7 @@ namespace FullText.Tree
         private TreeNode _parent;
         private ObservableCollection<TreeNode> _children = new ObservableCollection<TreeNode>();
         private bool _isSelected;
-        private bool? _isChecked = true;
+        private bool? _isChecked = false;
         public float searchScore;
 
         public TreeNode(string path)

@@ -1,13 +1,8 @@
 ﻿using PdfiumViewer.Core;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
-using WordInterop = Microsoft.Office.Interop.Word;
 
 namespace FullText.Helpers
 {
@@ -18,17 +13,31 @@ namespace FullText.Helpers
         public static string ReadText(string filePath)
         {
             string content = string.Empty;
-            string extension = Path.GetExtension(filePath);
-            if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) {  content = PdfiumExtractor(filePath); }
-            else if (MsWordExtensions.Contains(extension)) { content = MsWordExtractor(filePath); }
-            else { content = TikaTextExtractor(filePath); }
-            return content;
+            try
+            {
+                string extension = Path.GetExtension(filePath);
+                if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) { content = PdfiumExtractor(filePath); }
+                else if (MsWordExtensions.Contains(extension)) { content = MsWordExtractor(filePath); }
+                else { content = TikaTextExtractor(filePath); }
+            }
+            catch (Exception ex)
+            {
+                HebrewMessageBox.InformationMessageBox(ex.Message);
+            }
+            return content;          
         }
 
         static string MsWordExtractor(string filePath)
         {
-            string tempPath = WordToHtmlConverter.Convert(filePath);
-            return TikaTextExtractor(tempPath);
+            try
+            {
+                string tempPath = WordToHtmlConverter.Convert(filePath);
+                return TikaTextExtractor(tempPath);
+            }
+            catch
+            {
+                return TikaTextExtractor(filePath);
+            }
         }
 
         static string PdfiumExtractor(string filePath)
@@ -52,8 +61,7 @@ namespace FullText.Helpers
        public static string TikaTextExtractor(string filePath)
         {
             try { return new TikaOnDotNet.TextExtraction.TextExtractor().Extract(filePath).Text; }
-            catch { return string.Empty; }
-           
+            catch { return string.Empty; }        
         }
     }
 }

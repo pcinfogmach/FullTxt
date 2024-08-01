@@ -2,6 +2,7 @@
 using FullText.Search;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
+using org.apache.poi.ss.formula.functions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +25,8 @@ namespace FullText.Controls
             set { SetValue(ResultProperty, value); }
         }
 
+        private static string currentPath = string.Empty;
+
         private static void OnResultChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = d as ResultsWebView;
@@ -33,7 +36,14 @@ namespace FullText.Controls
         public async void LoadResult()
         {
             if (Result == null) { return; }
-            
+            if (Result.TreeNode.Path == currentPath)
+            {
+                FindSnippet();
+                return;
+            }
+
+            currentPath = Result.TreeNode.Path;
+
             this.Visibility = Visibility.Hidden;
             Source = new Uri("about:blank");
 
@@ -42,8 +52,12 @@ namespace FullText.Controls
 
             if (MsWordExtensions.Contains(extension))
             {
-                string tempPath = WordToHtmlConverter.Convert(Result.TreeNode.Path);
-                Source = new Uri(tempPath); 
+                string tempPath = Result.TreeNode.Path;
+                tempPath = await Task.Run(() =>
+                {
+                    return WordToHtmlConverter.Convert(tempPath);
+                });
+                Source = new Uri(tempPath);
             }
             else { Source = new Uri(Result.TreeNode.Path); }
 
@@ -64,41 +78,18 @@ namespace FullText.Controls
         async void FindSnippet()
         {
             string snippet = Regex.Replace(Result.Snippet, @"</?mark>", "");
-            string markedText = Regex.Match(Result.Snippet, @"<mark>(.*?)</mark>").Value;
+            string markedText = Regex.Match(Result.Snippet, @"<mark>(.*)</mark>").Value;
             markedText = Regex.Replace(markedText, @"</?mark>", "");
 
             var lines = snippet.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             string lineContainingMarkedText = lines.FirstOrDefault(line => line.Contains(markedText));
-            if (lineContainingMarkedText != null)
-            {
-                await FindTextAsync(lineContainingMarkedText);
-            }
-            else
-            {
-                await FindTextAsync(markedText);
-            }
-        }
-
-        private async Task FindTextAsync(string searchTerm)
-        {
-            string script = $@"
-            const targetString = `{searchTerm}`;
-            const content = document.body.innerHTML;
-            const index = content.indexOf(targetString);
-
-            if (index !== -1) {{
-               const highlightedText = content.substring(0, index) + 
-                                '<span style=""background-color:lightgray"">' + `{Result.Snippet}` + 
-                                '</span>' + content.substring(index + targetString.length);
-
-                document.body.innerHTML = highlightedText;
-                document.querySelector('mark').scrollIntoView({{ block: ""center"" }});
-            }} else {{
-                window.find(`{searchTerm}`);
-            }}";
-
-            await ExecuteScriptAsync(script);
-
+            
+            await ExecuteScriptAsync($@"
+window.getSelection().removeAllRanges(); 
+window.find(`{lineContainingMarkedText}`);
+window.getSelection().collapseToStart();
+window.find(`{markedText}`)
+");
         }
     }
 }

@@ -10,7 +10,7 @@ using System.Windows.Controls;
 
 namespace FullText.Controls
 {
-    public class ResultsViewer : ContentControl
+    public class ResultsViewer : Border
     {
         PdfiumPreViewer.PreViewer pdfPrevIewer = new PdfiumPreViewer.PreViewer();
         ResultsWebView resultsWebView = new ResultsWebView();
@@ -32,11 +32,15 @@ namespace FullText.Controls
 
         public void LoadResult()
         {
-            if (Result == null || Result.TreeNode == null || string.IsNullOrEmpty(Result.Snippet))
+            if (Result == null)
             {
-                this.Content = null;
+                this.Child = resultsWebView;
+                string appPath = AppDomain.CurrentDomain.BaseDirectory;
+                string InstructionsPath = Path.Combine(appPath, "Resources", "הוראות חיפוש מתקדם.html");
+                if (File.Exists(InstructionsPath)) { resultsWebView.Source = new Uri(InstructionsPath); }
                 return;
             }
+            else if (Result.TreeNode == null || string.IsNullOrEmpty(Result.Snippet)) { return; }
 
             string extension = Path.GetExtension(Result.TreeNode.Name);
             if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase))
@@ -45,15 +49,14 @@ namespace FullText.Controls
             }
             else
             {
-                Content = resultsWebView;
                 resultsWebView.Result = this.Result;
+                if (this.Child != resultsWebView) { this.Child = resultsWebView; }
             }
         }
 
         void LoadPdfResult()
         {
             pdfPrevIewer.Viewer.FilePath = Result.TreeNode.Path;
-            this.Content = pdfPrevIewer;
 
             string snippet = Regex.Replace(Result.Snippet, @"</?mark>", "");
             string markedText = Regex.Match(Result.Snippet, @"<mark>(.*?)</mark>").Value;
@@ -70,6 +73,8 @@ namespace FullText.Controls
             {
                 pdfPrevIewer.Viewer.InitialeSearchTerm = markedText;
             }
+
+            if (this.Child != pdfPrevIewer) { this.Child = pdfPrevIewer; }
         }
     }
 }

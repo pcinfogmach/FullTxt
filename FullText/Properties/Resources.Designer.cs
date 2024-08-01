@@ -139,5 +139,34 @@ namespace FullText.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;html&gt;
+        ///
+        ///&lt;head&gt;
+        ///&lt;meta http-equiv=Content-Type content=&quot;text/html; charset=windows-1255&quot;&gt;
+        ///&lt;meta name=Generator content=&quot;Microsoft Word 15 (filtered)&quot;&gt;
+        ///&lt;style&gt;
+        ///&lt;!--
+        /// /* Font Definitions */
+        /// @font-face
+        ///	{font-family:Wingdings;
+        ///	panose-1:5 0 0 0 0 0 0 0 0 0;}
+        ///@font-face
+        ///	{font-family:&quot;Cambria Math&quot;;
+        ///	panose-1:2 4 5 3 5 4 6 3 2 4;}
+        ///@font-face
+        ///	{font-family:Calibri;
+        ///	panose-1:2 15 5 2 2 2 4 3 2 4;}
+        ///@font-face
+        ///	{font-family:&quot;Calibri Light&quot;;
+        ///	panose-1:2 15 3 2 2 2 4 3 2 4;}
+        /// /* Style Definitions  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string הוראות_חיפוש_מתקדם {
+            get {
+                return ResourceManager.GetString("הוראות_חיפוש_מתקדם", resourceCulture);
+            }
+        }
     }
 }

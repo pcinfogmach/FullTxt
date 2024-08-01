@@ -3,8 +3,8 @@
                     xmlns:treeItems="clr-namespace:FullText.Tree"
                     xmlns:search="clr-namespace:FullText.Search"
                     xmlns:controls="clr-namespace:FullText.Controls"
-                    xmlns:helpers="clr-namespace:FullText.Helpers">
-
+                    xmlns:helpers="clr-namespace:FullText.Helpers"
+                    xmlns:updown="clr-namespace:NumericUpDownLib;assembly=NumericUpDownLib">
     <Style TargetType="Image">
         <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality" />
         <Setter Property="Width" Value="20" />
@@ -23,6 +23,33 @@
         <Setter Property="Padding" Value="1" />
     </Style>
 
+    <Style TargetType="StackPanel" x:Key="SettingStackPanel">
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+            </Style>
+            <Style TargetType="CheckBox">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+            </Style>
+        </Style.Resources>
+    </Style>
+
+    <Style TargetType="updown:ShortUpDown">
+        <Style.Resources>
+            <Style TargetType="RepeatButton">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderBrush" Value="LightGray"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+        </Style.Resources>
+    </Style>
+    
     <Style TargetType="Button">
         <Style.Resources>
             <Style TargetType="Border">
@@ -86,8 +113,10 @@
 
     <Style x:Key="ResultsListView" TargetType="ListView">
         <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         <Style.Resources>
             <helpers:SubtractConverter x:Key="SubtractConverter" />
+            <helpers:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <DataTemplate DataType="{x:Type search:ResultItem}">
                 <StackPanel>
                     <TextBlock
@@ -99,10 +128,12 @@
                      Text="{Binding TreeNode.Name}"/>
                     <controls:HighLightTextBlock
                      Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Path=ActualWidth, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource SubtractConverter}}"
+                     Visibility="{Binding DataContext.IsHighLightTextBlockVisibile, ElementName=SearchResultsListView,Converter={StaticResource BooleanToVisibilityConverter}}"
                      VerticalAlignment="Center"
                      HighlightedText="{Binding Snippet}"
                      TextAlignment="Justify"
-                     TextWrapping="WrapWithOverflow" />
+                     TextWrapping="WrapWithOverflow">
+                    </controls:HighLightTextBlock>
                 </StackPanel>
             </DataTemplate>
         </Style.Resources>

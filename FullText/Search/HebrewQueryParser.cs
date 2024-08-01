@@ -45,7 +45,7 @@ namespace FullText.Search
         {
             var parsedQuery = Parse(queryText);
             var spanQuery = SpanQueryParser(parsedQuery, distanceBetweenWords);
-            return new SpanNearQuery(spanQuery, distanceBetweenWords, true); ;
+            return new SpanNearQuery(spanQuery, distanceBetweenWords, false); ;
         }
 
         SpanQuery[] SpanQueryParser(Query parsedQuery, int distanceBetweenWords)

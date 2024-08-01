@@ -5,23 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
+using Lucene.Net.Util;
+using com.sun.source.util;
 
 namespace FullText
 {
     public class FullTxtViewModel : INotifyBase
     {
-        public FullTxtViewModel()
-        {
-            SearchTerm = RecentSearchCollection[0];
-            Application.Current.Exit += (s, e) => { SaveCurrentTreeStatus(); };
-        }
-
         #region Members
         private RootTreeNode _rootNode;
         bool _isIndexingInProgress;
@@ -34,9 +29,14 @@ namespace FullText
         int _recentSearchSelectedIndex = -1;
         int _selectedTabIndex = 1;
         ObservableCollection<ResultItem> _searchResults = new ObservableCollection<ResultItem>();
+        private Visibility _highLightTextBlockVisibility;
+        private bool _isHighLightTextBlockVisible = true;
         int _searchResultsSelectedIndex;
         ResultItem _currentResultItem;
         Uri _previewSource;
+
+        LuceneIndexer indexer = new LuceneIndexer();
+        List<string> foldersToIndex = new List<string>();
         #endregion
 
         #region Properties
@@ -165,101 +165,163 @@ namespace FullText
             }
         }
 
+        public short DistanceBetweenSearchWords
+        {
+            get => Properties.Settings.Default.DistanceBetweenSearchWords;
+            set 
+            {
+                Properties.Settings.Default.DistanceBetweenSearchWords = value; 
+                Properties.Settings.Default.Save();
+                OnPropertyChanged(nameof(DistanceBetweenSearchWords));
+            } 
+        }
+
+        public bool IsHighLightTextBlockVisibile
+        {
+            get => _isHighLightTextBlockVisible;
+            set
+            {
+                if (_isHighLightTextBlockVisible != value)
+                {
+                    _isHighLightTextBlockVisible = value;
+                    HighLightTextBlockVisibility = value ? Visibility.Visible : Visibility.Collapsed;
+                    OnPropertyChanged(nameof(IsHighLightTextBlockVisibile));
+                }
+            }
+        }
+
+        public Visibility HighLightTextBlockVisibility
+        {
+            get => Visibility.Collapsed;
+            set
+            {
+                if (_highLightTextBlockVisibility != value)
+                {
+                    _highLightTextBlockVisibility = value;
+                    OnPropertyChanged(nameof(HighLightTextBlockVisibility));
+                }
+            }
+        }
+
         #endregion
 
         #region Commands
         public ICommand IndexedSearchCommand { get => new RelayCommand(IndexedSearch); }
-        public ICommand SearchCommand { get => new RelayCommand(Search); }
-        public ICommand AddNewNodeCommand { get => new RelayCommand(AddNewNode); }
+        public ICommand LocalSearchCommand { get => new RelayCommand(LocalSearch); }
+        public ICommand AddNewNodeCommand { get => new RelayCommand(AddNewFolderToIndex); }
         public ICommand RemoveSelectedNodeCommand { get => new RelayCommand(RemoveSelectedNode); }
 
         #endregion
 
         #region Methods
 
-        void IndexedSearch()
+        public FullTxtViewModel()
         {
-            _currentSearchTerm = SearchTerm;
-            IsSearchInProgress = !IsSearchInProgress;
+            SearchTerm = RecentSearchCollection[0];
+            Application.Current.Exit += (s, e) => { SaveCurrentTreeStatus(); };
+            Properties.Settings.Default.PropertyChanged += Default_PropertyChanged;
+        }
 
-            if (SearchResults.Count > 0)
+        private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.Settings.Default.NodeToChange))
             {
-
+                new TreeLoader().UpdateTree(RootNode, Properties.Settings.Default.NodeToChange);
             }
         }
 
-        async void Search()
+        async void LocalSearch()
+        {
+            SelectedTabIndex = 0;
+            string queryText = SearchTerm;
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog { IsFolderPicker = true };
+
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                StartSearch();
+
+                var filePaths = System.IO.Directory.GetFiles(dialog.FileName, "*.*", System.IO.SearchOption.AllDirectories);
+
+                var tasks = filePaths.Select(async filePath =>
+                {
+                    if (!IsSearchInProgress) return;
+                    SearchResults.AddRange(await Task.Run(() =>
+                    {
+                        return new InMemoryLuceneSearch().Search(filePath, queryText);
+                    }));
+                });
+
+                await Task.WhenAll(tasks);
+
+                EndSearch();
+            }
+        }
+
+        async void IndexedSearch()
         {
             if (IsSearchInProgress) { IsSearchInProgress = false; return; }
-
-            _currentSearchTerm = SearchTerm;
-            UpdateRecentSearchCollection(SearchTerm);
-            IsSearchInProgress = true;
+            if (RootNode.Children.Count == 0) 
+            {
+                var result = HebrewMessageBox.YesNoMessageBox("לא נמצאו קבצים באינדקס האם ברצונך לערוך חיפוש חד פעמי ללא אינדקס?");
+                if (result == MessageBoxResult.Yes) { LocalSearch(); }
+                return; 
+            }
+            
+            StartSearch();
 
             List<TreeNode> checkedTreeItems = RootNode.AllTreeNodes
                 .Where(node => node is FileTreeNode && node.IsChecked == true).ToList();
-
-            _searchResults.Clear();
             SearchResults = await Task.Run(() =>
             {
                 return new ObservableCollection<ResultItem>
                 (new LuceneSearch().Search(SearchTerm, checkedTreeItems));
             });
 
+            if (_searchResults.Count > 0) { SelectedTabIndex = 0; SearchResultsSelectedIndex = 0; CurrentResultItem = SearchResults[0]; }
+            EndSearch();
+        }
+
+        void StartSearch()
+        {
+            _currentSearchTerm = SearchTerm;
+            UpdateRecentSearchCollection(SearchTerm);
+            IsSearchInProgress = true;
+            _searchResults.Clear();
+        }
+
+        void EndSearch()
+        {
             if (_searchResults.Count <= 0) { MessageBox.Show("לא נמצאו תוצאות"); }
-            else { SelectedTabIndex = 0; SearchResultsSelectedIndex = 0; CurrentResultItem = SearchResults[0]; }
             IsSearchInProgress = false;
         }
 
-        public async void AddNewNode()
+        public async void AddNewFolderToIndex()
         {
-            if (IsIndexingInProgress) { MessageBox.Show("התוכנה עסוקה בפעולות קודמות"); return; }
-            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;
-
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-                var existingNode = RootNode.Children.FirstOrDefault(child => child.Path == dialog.FileName);
-                if (existingNode != null)
-                {
-                    var result = MessageBox.Show("תיקייה זו כבר קיימת באינדקס האם ברצונך לעדכן אותה?", "תיקייה קיימת", MessageBoxButton.YesNo, MessageBoxImage.Exclamation, MessageBoxResult.Yes, MessageBoxOptions.RightAlign | MessageBoxOptions.RtlReading);
-                    if (result == MessageBoxResult.No) return;
-                    existingNode.Parent.RemoveChild(existingNode);
-                }
-
-                IsIndexingInProgress = true;
-                string[] files = System.IO.Directory.GetFiles(dialog.FileName, "*.*", System.IO.SearchOption.AllDirectories);
-                await Task.Run(() =>
-                {
-                    new LuceneSearch().IndexFiles(files.ToList());
-                });
-
-                FolderTreeNode folderTreeNode = new FolderTreeNode(dialog.FileName);
-                _rootNode.AddChild(folderTreeNode);
-                _rootNode.AllTreeNodes.Add(folderTreeNode);
-                new TreeLoader().PopulateChildren(_rootNode, folderTreeNode, new List<string>());
-                OnPropertyChanged(nameof(RootNode));
-                IsIndexingInProgress = false;
-            }
+            IsIndexingInProgress = true;
+            await Task.Run(async () => { await indexer.NewIndexingTask(); });
+            IsIndexingInProgress = false;
         }
 
         public async void RemoveSelectedNode()
         {
             if (IsIndexingInProgress) { MessageBox.Show("התוכנה עסוקה בפעולות קודמות"); return; }
-            IsIndexingInProgress = true;
 
             var selectedNode = _rootNode.AllTreeNodes.FirstOrDefault(node => node.IsSelected);
-            if (selectedNode.Parent is RootTreeNode) selectedNode.Parent.RemoveChild(selectedNode);
-
-            List<string> filesToRemove = selectedNode.GetAllFilePaths();
-            await Task.Run(() =>
+            if (selectedNode != null && selectedNode.Parent is RootTreeNode)
             {
-                new LuceneSearch().RemoveFiles(filesToRemove);
-            });
-
-            SaveCurrentTreeStatus();
-            RootNode = new TreeLoader().Load();
-            IsIndexingInProgress = false;
+                List<string> filesToRemove = selectedNode.GetAllFilePaths();
+                await Task.Run(() =>
+                {
+                    new LuceneIndexer().RemoveFiles(filesToRemove);
+                });
+                selectedNode.Parent.RemoveChild(selectedNode);
+            }
+            else
+            {
+                HebrewMessageBox.InformationMessageBox("אין אפשרות למחוק פריט זה");
+            }
+            //SaveCurrentTreeStatus();
+            //RootNode = new TreeLoader().Load();
         }
 
         public void UpdateRecentSearchCollection(string input)
