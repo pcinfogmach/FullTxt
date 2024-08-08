@@ -41,6 +41,8 @@ namespace FullText.Search
             }
         }
 
+
+
         public SpanNearQuery ParseSpanQuery(string queryText, int distanceBetweenWords)
         {
             var parsedQuery = Parse(queryText);

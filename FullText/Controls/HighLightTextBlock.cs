@@ -3,6 +3,8 @@ using System.Windows.Media;
 using System.Windows;
 using System.Windows.Controls;
 using System.Text.RegularExpressions;
+using System.Windows.Threading;
+using System;
 
 namespace FullText.Controls
 {
@@ -23,8 +25,10 @@ namespace FullText.Controls
             control?.UpdateText();
         }
 
-        private void UpdateText()
+        private async void UpdateText()
         {
+            //await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            //{
             Inlines.Clear();
             if (string.IsNullOrEmpty(HighlightedText))
             {
@@ -58,6 +62,7 @@ namespace FullText.Controls
             {
                 Inlines.Add(new Run(HighlightedText.Substring(lastPos)));
             }
+            //}), DispatcherPriority.Background);
         }
     }
 }

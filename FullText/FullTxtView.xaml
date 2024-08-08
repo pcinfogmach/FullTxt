@@ -114,6 +114,8 @@
                         <ListView
                             x:Name="SearchResultsListView"
                             Grid.Row="1"
+                            VirtualizingStackPanel.IsVirtualizing="True"
+                            VirtualizingStackPanel.VirtualizationMode="Recycling"
                             ItemsSource="{Binding SearchResults}"
                             SelectedIndex="{Binding SearchResultsSelectedIndex}"
                             Style="{StaticResource ResultsListView}" />
@@ -143,10 +145,10 @@
                             </Button>
                         </StackPanel>
                         
-                        <ProgressBar
+                        <!--<ProgressBar
                             Grid.Row="1"
                             Height="5"
-                            IsIndeterminate="{Binding IsIndexingInProgress}" />
+                            IsIndeterminate="{Binding IsIndexingInProgress}" />-->
 
                         <TreeView
                             Grid.Row="2"
@@ -185,8 +187,8 @@
                             </Border>
                         </StackPanel>
                         <Separator />
-                        <CheckBox Margin="5,10,5,10" Content="השתמש במנוע של וורד" />
-                        <Separator />
+                        <!--<CheckBox Margin="5,10,5,10" Content="השתמש במנוע של וורד" />
+                        <Separator />-->
                     </StackPanel>
                 </TabItem>
             </TabControl>

@@ -10,8 +10,7 @@ using System.Windows.Input;
 using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
-using Lucene.Net.Util;
-using com.sun.source.util;
+using System.Windows.Threading;
 
 namespace FullText
 {
@@ -43,7 +42,7 @@ namespace FullText
 
         public RootTreeNode RootNode
         {
-            get { if (_rootNode == null) _rootNode = new TreeLoader().Load(); return _rootNode; }
+            get { if (_rootNode == null) { _rootNode = new TreeLoader().Load(); ; } return _rootNode; }
             set { if (_rootNode != value) { _rootNode = value; OnPropertyChanged(nameof(RootNode)); } }
         }
 
@@ -224,9 +223,9 @@ namespace FullText
 
         private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(Properties.Settings.Default.NodeToChange))
+            if (e.PropertyName == nameof(Properties.Settings.Default.FolderNodeToChange))
             {
-                new TreeLoader().UpdateTree(RootNode, Properties.Settings.Default.NodeToChange);
+                new TreeLoader().UpdateTree(RootNode, Properties.Settings.Default.FolderNodeToChange);
             }
         }
 
@@ -241,17 +240,35 @@ namespace FullText
                 StartSearch();
 
                 var filePaths = System.IO.Directory.GetFiles(dialog.FileName, "*.*", System.IO.SearchOption.AllDirectories);
-
-                var tasks = filePaths.Select(async filePath =>
+               
+                foreach ( var filePath in filePaths ) 
                 {
-                    if (!IsSearchInProgress) return;
-                    SearchResults.AddRange(await Task.Run(() =>
+                    var results = await Task.Run(() =>
                     {
                         return new InMemoryLuceneSearch().Search(filePath, queryText);
-                    }));
-                });
+                    });
 
-                await Task.WhenAll(tasks);
+                    foreach (var result in results )
+                    {
+                        if (IsSearchInProgress) await Task.Delay(1000);
+                        await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            SearchResults.Add(result);
+                        }), DispatcherPriority.DataBind);
+                    }                 
+                }
+               
+
+                //var tasks = filePaths.Select(async filePath =>
+                //{
+                //    if (!IsSearchInProgress) return;
+                //    SearchResults.AddRange(await Task.Run(() =>
+                //    {
+                //        return new InMemoryLuceneSearch().Search(filePath, queryText);
+                //    }));
+                //});
+
+                //await Task.WhenAll(tasks);
 
                 EndSearch();
             }
@@ -271,11 +288,20 @@ namespace FullText
 
             List<TreeNode> checkedTreeItems = RootNode.AllTreeNodes
                 .Where(node => node is FileTreeNode && node.IsChecked == true).ToList();
-            SearchResults = await Task.Run(() =>
+
+            var searchResults = await new LuceneSearch().Search(SearchTerm, checkedTreeItems);
+
+            await Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                return new ObservableCollection<ResultItem>
-                (new LuceneSearch().Search(SearchTerm, checkedTreeItems));
-            });
+                SearchResults = new ObservableCollection<ResultItem>(searchResults);
+            }, DispatcherPriority.Background);
+
+
+            //SearchResults = await Task.Run(() =>
+            //{
+            //    return new ObservableCollection<ResultItem>
+            //    (new LuceneSearch().Search(SearchTerm, checkedTreeItems));
+            //});
 
             if (_searchResults.Count > 0) { SelectedTabIndex = 0; SearchResultsSelectedIndex = 0; CurrentResultItem = SearchResults[0]; }
             EndSearch();
@@ -295,10 +321,10 @@ namespace FullText
             IsSearchInProgress = false;
         }
 
-        public async void AddNewFolderToIndex()
+        public void AddNewFolderToIndex()
         {
             IsIndexingInProgress = true;
-            await Task.Run(async () => { await indexer.NewIndexingTask(); });
+            indexer.CreateNewIndexingTask();
             IsIndexingInProgress = false;
         }
 

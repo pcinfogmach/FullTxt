@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 
 namespace FullText.Tree
 {
@@ -134,16 +132,19 @@ namespace FullText.Tree
         public void AddChild(TreeNode child)
         {
             child.Parent = this;
-            Children.Add(child);
+            Application.Current.Dispatcher.Invoke(() => {  Children.Add(child); });
         }
 
         public void RemoveChild(TreeNode child)
         {
-            if (_children.Remove(child))
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                child.Parent = null;
-                OnPropertyChanged(nameof(Children));
-            }
+                if (_children.Remove(child))
+                {
+                    child.Parent = null;
+                    OnPropertyChanged(nameof(Children));
+                }
+            });
         }
 
         void SetIsChecked(bool? value, bool updateChildren, bool updateParent)

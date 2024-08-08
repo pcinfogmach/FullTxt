@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace FullText.Search
@@ -16,28 +17,31 @@ namespace FullText.Search
         public int slop = Properties.Settings.Default.DistanceBetweenSearchWords;
         public List<ResultItem> results = new List<ResultItem>();
 
-        public List<ResultItem> Search(string queryText, List<TreeNode> checkedTreeNodes)
+        public async Task<List<ResultItem>> Search(string queryText, List<TreeNode> checkedTreeNodes)
         {
-            results = new List<ResultItem>();
-            try
+            return await Task.Run(() =>
             {
-                using (var directory = FSDirectory.Open(new DirectoryInfo(indexPath)))
+                results = new List<ResultItem>();
+                try
                 {
-                    IndexSearcher searcher = new IndexSearcher(DirectoryReader.Open(directory));
-                    var topDocs = PerformSearch(searcher, ref queryText, 2);
-
-                    foreach (var scoreDoc in topDocs.ScoreDocs)
+                    using (var directory = FSDirectory.Open(new DirectoryInfo(indexPath)))
                     {
-                        GetResults(queryText, checkedTreeNodes, searcher, scoreDoc.Doc);
+                        IndexSearcher searcher = new IndexSearcher(DirectoryReader.Open(directory));
+                        var topDocs = PerformSearch(searcher, ref queryText, 2);
+
+                        foreach (var scoreDoc in topDocs.ScoreDocs)
+                        {
+                            GetResults(queryText, checkedTreeNodes, searcher, scoreDoc.Doc);
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
 
-            return results;
+                return results;
+            });
         }
 
         void GetResults(string queryText, List<TreeNode> checkedTreeNodes, IndexSearcher searcher, int scoreDocId)

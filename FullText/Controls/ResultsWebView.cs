@@ -47,21 +47,28 @@ namespace FullText.Controls
             this.Visibility = Visibility.Hidden;
             Source = new Uri("about:blank");
 
-            string[] MsWordExtensions = { ".doc", ".docm", ".docx", ".dotx", ".dotm", ".dot", ".odt", ".rtf" };
-            string extension = Path.GetExtension(Result.TreeNode.Name);
 
-            if (MsWordExtensions.Contains(extension))
+            if (Result.TreeNode.Path.IsWordDocumentFile())
             {
                 string tempPath = Result.TreeNode.Path;
                 tempPath = await Task.Run(() =>
                 {
-                    return WordToHtmlConverter.Convert(tempPath);
+                    return HtmlConverter.Convert(tempPath);
+                });
+                Source = new Uri(tempPath);
+            }
+            else if (Result.TreeNode.Path.IsCompressedFile())
+            {
+                string tempPath = Result.TreeNode.Path;
+                tempPath = await Task.Run(() =>
+                {
+                    return HtmlConverter.TikaConverter(tempPath);
                 });
                 Source = new Uri(tempPath);
             }
             else { Source = new Uri(Result.TreeNode.Path); }
 
-            if (extension.Equals(".pdf", StringComparison.OrdinalIgnoreCase)) { this.Visibility = Visibility.Visible; return; }         
+            if (Result.TreeNode.Path.IsPdfFile()) { this.Visibility = Visibility.Visible; return; }         
             
             await EnsureCoreWebView2Async(null);
             CoreWebView2.DOMContentLoaded += CoreWebView2_DOMContentLoaded;

@@ -1,4 +1,5 @@
-﻿using MsWordTextExtractor;
+﻿using FullTxtIndexer;
+using MsWordTextExtractor;
 using PdfiumViewer.Core;
 using System;
 using System.IO;
@@ -22,23 +23,10 @@ namespace FullText.Helpers
             }
             catch (Exception ex)
             {
-                HebrewMessageBox.InformationMessageBox(ex.Message);
+                HebrewConsole.WriteLine(ex.Message);
             }
             return content;          
         }
-
-        //static string MsWordExtractor(string filePath)
-        //{
-        //    try
-        //    {
-        //        string tempPath = HtmlConverter.Convert(filePath);
-        //        return TikaTextExtractor(tempPath);
-        //    }
-        //    catch
-        //    {
-        //        return TikaTextExtractor(filePath);
-        //    }
-        //}
 
         static string PdfiumExtractor(string filePath)
         {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FullText.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,23 @@ namespace FullText.Tree
             return rootNode;
         }
 
+        List<string> ValidateDirectories()
+        {           
+            List<string> directories = new List<string>();
+            foreach (string directory in Properties.Settings.Default.RootFolderNodes)
+            {
+                if(Directory.Exists(directory)) { directories.Add(directory); }
+                else 
+                {
+                    string appRoot = Path.GetPathRoot(AppDomain.CurrentDomain.BaseDirectory);
+                    string root = Path.GetPathRoot(directory);
+                    directory.Replace(root, appRoot);
+                    if (Directory.Exists(directory)) { directories.Add(directory); }
+                }
+            }
+            return directories;  
+        }
+
         public void PopulateChildren(RootTreeNode rootNode, FolderTreeNode parentnode, List<string> checkedFileNodes)
         {
             string[] directories = Directory.GetDirectories(parentnode.Path);
@@ -51,19 +69,16 @@ namespace FullText.Tree
 
         public void UpdateTree(RootTreeNode rootNode, string folderToChange)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            var nodeToRemove = rootNode.Children.FirstOrDefault(node => node.Path == folderToChange);
+            if (nodeToRemove != null) { rootNode.RemoveChild(nodeToRemove); }
+            else
             {
-                var nodeToRemove = rootNode.Children.FirstOrDefault(node => node.Path == folderToChange);
-                if (nodeToRemove != null) { rootNode.RemoveChild(nodeToRemove); }
-                else
-                {
-                    FolderTreeNode folderTreeNode = new FolderTreeNode(folderToChange);
-                    rootNode.AddChild(folderTreeNode);
-                    rootNode.AllTreeNodes.Add(folderTreeNode);
-                    PopulateChildren(rootNode, folderTreeNode, new List<string>());
-                    folderTreeNode.IsChecked = true;
-                }
-            });                  
+                FolderTreeNode folderTreeNode = new FolderTreeNode(folderToChange);
+                rootNode.AddChild(folderTreeNode);
+                rootNode.AllTreeNodes.Add(folderTreeNode);
+                PopulateChildren(rootNode, folderTreeNode, new List<string>());
+                folderTreeNode.IsChecked = true;
+            }
         }
     }
 }
