@@ -41,6 +41,8 @@ namespace MsWordTextExtractor
 
         static string ReadAllTextParts(string filePath)
         {
+            try
+            { 
             StringBuilder stb = new StringBuilder();
             using (WordprocessingDocument wordprocessingDocument = WordprocessingDocument.Open(filePath, false))
             {
@@ -68,6 +70,17 @@ namespace MsWordTextExtractor
                 }
             }
             return stb.ToString();
+            }
+            catch (FileFormatException ex)
+            {
+                Console.WriteLine($"File format exception: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                throw;
+            }
         }
 
         static string ReadTextPart(Stream partStream)

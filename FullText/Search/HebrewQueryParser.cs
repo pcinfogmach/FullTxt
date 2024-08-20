@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Lucene.Net.QueryParsers.Classic;
 using System.Text.RegularExpressions;
 using Lucene.Net.Analysis;
+using static Lucene.Net.QueryParsers.Flexible.Core.Nodes.PathQueryNode;
 
 namespace FullText.Search
 {
@@ -41,13 +42,17 @@ namespace FullText.Search
             }
         }
 
-
+        public Query ParseContstantScoreQuery(string queryText)
+        {
+            var parsedQuery = Parse(queryText);
+            return new ConstantScoreQuery(parsedQuery);
+        }
 
         public SpanNearQuery ParseSpanQuery(string queryText, int distanceBetweenWords)
         {
             var parsedQuery = Parse(queryText);
             var spanQuery = SpanQueryParser(parsedQuery, distanceBetweenWords);
-            return new SpanNearQuery(spanQuery, distanceBetweenWords, false); ;
+            return new SpanNearQuery(spanQuery, distanceBetweenWords, false);
         }
 
         SpanQuery[] SpanQueryParser(Query parsedQuery, int distanceBetweenWords)

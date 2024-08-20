@@ -9,14 +9,12 @@ namespace FullText.Helpers
 {
     public static class TextExtractor
     {
-        static string[] MsWordExtensions = { ".doc", ".docm", ".docx", ".dotx", ".dotm", ".dot", ".odt", ".rtf" };
-
         public static string ReadText(string filePath)
         {
             string content = string.Empty;
             try
             {                
-                if (filePath.IsPdfFile()) content = PdfiumExtractor(filePath); 
+                if (filePath.IsPdfFile()) content = new XpdfNet.XpdfHelper().ToText(filePath); 
                 else if (filePath.IsWordDocumentFile())  content = DocxTextExtractor.Extract(filePath); 
                 else content = TikaTextExtractor(filePath); 
             }

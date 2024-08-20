@@ -11,6 +11,10 @@ using System.Windows;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
+using FullText.Search.Tests;
+using org.bouncycastle.asn1.cmp;
+using DocumentFormat.OpenXml;
+using System.IO;
 
 namespace FullText
 {
@@ -140,11 +144,15 @@ namespace FullText
             {
                 if (_searchResultsSelectedIndex != value && value != -1)
                 {
-                    _searchResultsSelectedIndex = value;
-                    //PreviewSource = new Uri("about:blank");
-                    //PreviewSource = new Uri(HtmlConverter.ConvertToHtml(SearchResults[value].TreeNode.Path));
-                    CurrentResultItem = SearchResults[value];
-                    OnPropertyChanged(nameof(SearchResultsSelectedIndex));
+                    try
+                    {
+                        _searchResultsSelectedIndex = value;
+                        //PreviewSource = new Uri("about:blank");
+                        //PreviewSource = new Uri(HtmlConverter.ConvertToHtml(SearchResults[value].TreeNode.Path));
+                        CurrentResultItem = SearchResults[value];
+                        OnPropertyChanged(nameof(SearchResultsSelectedIndex));
+                    }
+                    catch (Exception ex) { MessageBox.Show(ex.Message); }
                 }
             }
         }
@@ -237,6 +245,7 @@ namespace FullText
 
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
+                int totalSum = 0;
                 StartSearch();
 
                 var filePaths = System.IO.Directory.GetFiles(dialog.FileName, "*.*", System.IO.SearchOption.AllDirectories);
@@ -251,8 +260,10 @@ namespace FullText
                     foreach (var result in results )
                     {
                         if (IsSearchInProgress) await Task.Delay(1000);
+                        totalSum++;
                         await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
+                            result.Title = totalSum.ToString() + ". " + result.TreeNode.Name;
                             SearchResults.Add(result);
                         }), DispatcherPriority.DataBind);
                     }                 
@@ -296,7 +307,6 @@ namespace FullText
                 SearchResults = new ObservableCollection<ResultItem>(searchResults);
             }, DispatcherPriority.Background);
 
-
             //SearchResults = await Task.Run(() =>
             //{
             //    return new ObservableCollection<ResultItem>
@@ -330,24 +340,25 @@ namespace FullText
 
         public async void RemoveSelectedNode()
         {
+            //new TermAnalyzerWithSnippets().AnalyzeTermsUsingPostingsEnum();
             if (IsIndexingInProgress) { MessageBox.Show("התוכנה עסוקה בפעולות קודמות"); return; }
 
             var selectedNode = _rootNode.AllTreeNodes.FirstOrDefault(node => node.IsSelected);
             if (selectedNode != null && selectedNode.Parent is RootTreeNode)
             {
+                selectedNode.Parent.RemoveChild(selectedNode);
                 List<string> filesToRemove = selectedNode.GetAllFilePaths();
                 await Task.Run(() =>
                 {
                     new LuceneIndexer().RemoveFiles(filesToRemove);
                 });
-                selectedNode.Parent.RemoveChild(selectedNode);
             }
             else
             {
                 HebrewMessageBox.InformationMessageBox("אין אפשרות למחוק פריט זה");
             }
-            //SaveCurrentTreeStatus();
-            //RootNode = new TreeLoader().Load();
+            SaveCurrentTreeStatus();
+            RootNode = new TreeLoader().Load();
         }
 
         public void UpdateRecentSearchCollection(string input)

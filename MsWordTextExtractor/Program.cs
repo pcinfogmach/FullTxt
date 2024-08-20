@@ -1,13 +1,8 @@
-﻿using DocumentFormat.OpenXml.Office.CustomUI;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
+using OpenXmlPowerTools;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml;
+using System.Xml.Linq;
 
 namespace MsWordTextExtractor
 {
@@ -15,14 +10,31 @@ namespace MsWordTextExtractor
     {
         static void Main(string[] args)
         {
-            string filePath = "C:\\Users\\Admin\\Desktop\\וידאו מספק דרך רבת - Copy.doc";
-            //string filePath = "C:\\Users\\Admin\\Documents\\גמ''ח\\ספריה תורנית\\אוצר התורה מיר - מאגר מ''מ\\1ברכות\\דור המלקטים או''ח קנז-רמ.doc";
-            string convertedDoc = filePath + ".txt";
-            File.WriteAllText(convertedDoc, NpoiDocExtractor.ExtractTextFromDoc(filePath));
-            //XMlPowerToolsExtractor.ConvertDocxToHtml(filePath, convertedDoc);
-            System.Diagnostics.Process.Start(convertedDoc);
+            string filePath = @"C:\Users\Admin\Desktop\וידאו מספק דרך רבת.docx";
+            string htmlPath = filePath + ".html";
+
+            ConvertDocxToHtml(filePath, htmlPath);
+            System.Diagnostics.Process.Start("explorer.exe", htmlPath);
         }
 
-      
+        static void ConvertDocxToHtml(string docxFilePath, string htmlFilePath)
+        {
+            // Open the DOCX file with read-write access
+            using (WordprocessingDocument docx = WordprocessingDocument.Open(docxFilePath, true))  // Set to true for read-write
+            {
+                // Create an instance of HtmlConverter
+                HtmlConverterSettings settings = new HtmlConverterSettings()
+                {
+                    PageTitle = "Converted Document"
+                };
+
+                XElement html = HtmlConverter.ConvertToHtml(docx, settings);
+
+                // Save the resulting HTML to a file
+                File.WriteAllText(htmlFilePath, html.ToString(SaveOptions.DisableFormatting));
+            }
+
+            Console.WriteLine("Conversion complete. HTML saved to " + htmlFilePath);
+        }
     }
 }

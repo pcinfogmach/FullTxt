@@ -12,14 +12,14 @@ namespace MsWordTextExtractor
     {
         public static string Extract(string filePath)
         {
-            try
-            {
+            //try
+            //{
                 return ReadAllTextParts(filePath);
-            }
-            catch
-            {
-                return WordInteropExtractor(filePath);
-            }
+            //}
+            //catch
+            //{
+            //    return WordInteropExtractor(filePath);
+            //}
         }
 
         static string ReadAllTextParts(string filePath)

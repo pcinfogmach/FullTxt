@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.IO.Pipes;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FullText.Search;
 
 namespace FullTxtIndexer
@@ -16,7 +13,7 @@ namespace FullTxtIndexer
         {
             using (NamedPipeClientStream pipeClient = new NamedPipeClientStream(".", "FullTxtIndexerPipe", PipeDirection.InOut))
             {
-                Console.WriteLine("Connecting to server...\n");
+                HebrewConsole.WriteLine("בטעינה...\n");
                 pipeClient.Connect();
 
                 StreamReader reader = new StreamReader(pipeClient);
@@ -35,7 +32,9 @@ namespace FullTxtIndexer
                     }
                     else indexingQueue.Add(message);
                 }
-                writer.WriteLine("done");
+
+                writer.WriteLine("DONE");
+                Console.WriteLine("exit");
             }
         }
     }

@@ -67,34 +67,55 @@ namespace FullText.Search
             var progressDialog = ProgressDialog.Start($"מאנדקס את: {directoryToIndex}", files.Count, cancellationTokenSource);
             Application.Current.MainWindow.Closing += (s, e) => { cancellationTokenSource.Cancel(); progressDialog.Report(-1); };
 
+            await Task.Run(() =>
+            {
+                var indexConfig = new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer)
+                {
+                    Similarity = new CustomSimilarity()
+                };
 
-          
+                var contentFieldType = new FieldType
+                {
+                    IsIndexed = true,
+                    IndexOptions = IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS,
+                    IsStored = true,
+                    StoreTermVectors = true,
+                    StoreTermVectorOffsets = true,
+                    StoreTermVectorPositions = true
+                };
 
-            //    await Task.Run(() =>
-            //    {
-            //        var helper = new LuceneIndexerHelper();
-            //        try
-            //        {
-            //            Parallel.ForEach(files, new ParallelOptions {  CancellationToken = cancellationTokenSource.Token }, (file) =>
-            //            {
-            //                Console.WriteLine(file);
+                using (IndexWriter writer = new IndexWriter(FSDirectory.Open(new DirectoryInfo(indexPath)), indexConfig))
+                {
+                    try
+                    {
+                        Parallel.ForEach(files, new ParallelOptions { CancellationToken = cancellationTokenSource.Token }, (file) =>
+                        {
+                            Console.WriteLine(file);
 
-            //                string content = TextExtractor.ReadText(file);
-            //                string id = idRegex.Replace(file, "");
+                            string content = TextExtractor.ReadText(file);
+                            string id = idRegex.Replace(file, "");
 
-            //                lock (helper)
-            //                {
-            //                     helper.IndexFileAsync(file, id, content).Wait();
-            //                }
+                            lock (writer)
+                            {
+                                writer.UpdateDocument(new Term("Id", id), new Document // Update the document if it exists, otherwise add it
+                                    {
+                                        new StringField("Path", file, Field.Store.YES),
+                                        new StringField("Id", id, Field.Store.YES),
+                                        new Field("Content", content, contentFieldType)
+                                    });
+                            }
 
-            //                filesToIndex[file] = true;
-            //                progressDialog.Report(1);
+                            filesToIndex[file] = true;
+                            progressDialog.Report(1);
 
-            //            });
-            //        }
-            //        catch (Exception ex) { MessageBox.Show(ex.Message); }
-            //    });
-            
+                        });
+
+                    }
+                    catch (Exception ex) { MessageBox.Show(ex.Message); }
+                }
+            });
+
+
 
             //using (IndexWriter IndexWriter = new IndexWriter(FSDirectory.Open(new DirectoryInfo(indexPath)),
             //    new IndexWriterConfig(LuceneVersion.LUCENE_48, analyzer)))
@@ -107,8 +128,6 @@ namespace FullText.Search
                 Properties.Settings.Default.FolderNodeToChange = directoryToIndex;
             progressDialog.Report(-1);
         }
-
-        
 
         public void RemoveFiles(List<string> files)
         {

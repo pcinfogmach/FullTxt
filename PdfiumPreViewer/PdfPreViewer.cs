@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.IO.Pipes;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using PdfiumPreViewer.Helpers;
@@ -19,13 +17,6 @@ namespace PdfiumPreViewer
         {
             SearchManager = new PdfSearchManager(this);
         }
-
-        public static readonly DependencyProperty InitialeSearchTermProperty =
-            DependencyProperty.Register(
-                nameof(InitialeSearchTerm),
-                typeof(string),
-                typeof(PdfPreViewer),
-                new PropertyMetadata(string.Empty, OnInitialeSearchTermChanged));
 
         public static readonly DependencyProperty SearchTermProperty =
             DependencyProperty.Register(
@@ -47,13 +38,6 @@ namespace PdfiumPreViewer
                typeof(bool),
                typeof(PdfPreViewer),
                new PropertyMetadata(false, OnIsHandToolsEnabledChanged));
-
-
-        public string InitialeSearchTerm
-        {
-            get => (string)GetValue(InitialeSearchTermProperty);
-            set => SetValue(InitialeSearchTermProperty, value);
-        }
 
         public string SearchTerm
         {
@@ -83,18 +67,6 @@ namespace PdfiumPreViewer
         public ICommand SearchNextCommand { get => new RelayCommand(() => SearchManager.FindNext(true)); }
         public ICommand SearchPreviousCommand { get => new RelayCommand(() => SearchManager.FindNext(false)); }
 
-
-        private static void OnInitialeSearchTermChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            if (d is PdfPreViewer viewer)  
-            {
-                viewer.ZoomMode = PdfViewerZoomMode.FitWidth;
-                string searchTerm = (string)e.NewValue;
-                viewer.SearchManager.Search(searchTerm.Trim());
-                try { viewer.SearchManager.FindNext(true); } catch { }
-            }
-        }
-
         void NewSearch()
         {
             if (lastSearchTerm != SearchTerm)
@@ -109,6 +81,7 @@ namespace PdfiumPreViewer
         {
             if (d is PdfPreViewer viewer)
             {
+                viewer.UnLoad();
                 viewer.OpenPdf(new FileStream((string)e.NewValue, FileMode.Open, FileAccess.Read, FileShare.Read));
             }
         }

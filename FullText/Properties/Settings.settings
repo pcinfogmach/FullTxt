@@ -21,7 +21,7 @@
 &lt;/ArrayOfString&gt;</Value>
     </Setting>
     <Setting Name="DistanceBetweenSearchWords" Type="System.Int16" Scope="User">
-      <Value Profile="(Default)">2</Value>
+      <Value Profile="(Default)">5</Value>
     </Setting>
     <Setting Name="FolderNodeToChange" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

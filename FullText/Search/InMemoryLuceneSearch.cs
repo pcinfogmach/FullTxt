@@ -17,7 +17,8 @@ namespace FullText.Search
             {
                 IndexFile(file);
                 var searcher = new IndexSearcher(DirectoryReader.Open(ramDirectory));
-                var topDocs = PerformSearch(searcher, ref queryText, 1);
+                Query query = parser.ParseSpanQuery(queryText, slop);
+                var topDocs = PerformSearch(query, searcher, ref queryText, 1);
                 if (topDocs.ScoreDocs.Length > 0)
                 {
                     return GetResults(queryText, searcher, topDocs.ScoreDocs[0].Doc);

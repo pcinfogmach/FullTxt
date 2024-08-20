@@ -10,17 +10,17 @@ namespace FullText.Search
 {
     internal class HebrewAnalyzer : Analyzer
     {
-        LuceneVersion version;
+        private readonly LuceneVersion version;
+
         public HebrewAnalyzer(LuceneVersion luceneVersion)
         {
             version = luceneVersion;
         }
+
         protected override TokenStreamComponents CreateComponents(string fieldName, TextReader reader)
         {
             var tokenizer = new StandardTokenizer(version, reader);
             TokenStream filter = new HebrewTokenFilter(tokenizer);
-            filter = new LowerCaseFilter(version, filter);
-            filter = new StopFilter(version, filter, StopAnalyzer.ENGLISH_STOP_WORDS_SET);
             return new TokenStreamComponents(tokenizer, filter);
         }
 
@@ -29,30 +29,32 @@ namespace FullText.Search
             return new HtmlStrippingCharFilter(reader);
         }
 
-        sealed class HebrewTokenFilter : TokenFilter
+        private sealed class HebrewTokenFilter : TokenFilter
         {
             private readonly ICharTermAttribute termAttr;
+            Regex diacriticsRegex = new Regex(@"\p{M}");
 
             public HebrewTokenFilter(TokenStream input) : base(input)
             {
-                this.termAttr = AddAttribute<ICharTermAttribute>();
+                termAttr = AddAttribute<ICharTermAttribute>();
             }
 
             public sealed override bool IncrementToken()
             {
-                if (m_input.IncrementToken())
+                if (!m_input.IncrementToken())
                 {
-                    string token = termAttr.ToString();
-                    string cleanedToken = Regex.Replace(token, @"\p{M}", "");
-
-                    if (!string.Equals(token, cleanedToken))
-                    {
-                        termAttr.SetEmpty().Append(cleanedToken);
-                    }
-
-                    return true;
+                    return false;
                 }
-                return false;
+
+                string token = termAttr.ToString();
+                string cleanedToken = diacriticsRegex.Replace(token, ""); // Removing diacritics 
+
+                if (!string.Equals(token, cleanedToken))
+                {
+                    termAttr.SetEmpty().Append(cleanedToken);
+                }
+
+                return true;
             }
         }
     }

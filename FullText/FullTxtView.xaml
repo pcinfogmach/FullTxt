@@ -15,6 +15,11 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
+            <CollectionViewSource x:Key="groupedItems" Source="{Binding SearchResults}">
+                <CollectionViewSource.GroupDescriptions>
+                    <PropertyGroupDescription PropertyName="GroupName"/>
+                </CollectionViewSource.GroupDescriptions>
+            </CollectionViewSource>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/DropDownDictionary.xaml" />
                 <ResourceDictionary Source="Themes/FullTextViewDictionary.xaml" />
@@ -57,7 +62,7 @@
                         <KeyBinding Key="Return" Command="{Binding IndexedSearchCommand}" />
                     </TextBox.InputBindings>
                 </TextBox>
-                
+
 
                 <StackPanel
                     Grid.Column="0"
@@ -77,15 +82,17 @@
                         ToolTip="חיפוש חד פעמי ללא אינדקס">
                         <Image Source="/Resources/SearchFolder.png" />
                     </Button>
+
+                    <ProgressBar
+    x:Name="progressBar"
+    Grid.Row="1"
+    Width="25"
+    Height="5"
+    IsIndeterminate="{Binding IsSearchInProgress}" 
+    HorizontalAlignment="Left"/>
                 </StackPanel>
             </Grid>
         </Border>
-
-        <ProgressBar
-            x:Name="progressBar"
-            Grid.Row="1"
-            Height="5"
-            IsIndeterminate="{Binding IsSearchInProgress}" />
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
@@ -107,18 +114,57 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton ToolTip="הצג גזירים" IsChecked="{Binding IsHighLightTextBlockVisibile}">
+                            <ToggleButton x:Name="ShowSnippetsToggleButton" ToolTip="הצג גזירים" IsChecked="{Binding IsHighLightTextBlockVisibile}">
                                 <Image Source="/Resources/ListIcon.png" />
                             </ToggleButton>
+                            <RepeatButton x:Name="ShowNextResult" Content="❮" Click="ShowNextResult_Click" Background="Transparent" BorderThickness="0" Width="25"/>
+                            <RepeatButton x:Name="ShowPreviousResult" Content="❯" Click="ShowPreviousResult_Click" Background="Transparent" BorderThickness="0" Width="25"/>
                         </StackPanel>
+                        
                         <ListView
                             x:Name="SearchResultsListView"
                             Grid.Row="1"
                             VirtualizingStackPanel.IsVirtualizing="True"
                             VirtualizingStackPanel.VirtualizationMode="Recycling"
-                            ItemsSource="{Binding SearchResults}"
+                            ItemsSource="{Binding Source={StaticResource groupedItems}}"
                             SelectedIndex="{Binding SearchResultsSelectedIndex}"
-                            Style="{StaticResource ResultsListView}" />
+                            Style="{StaticResource ResultsListView}">
+                            <ListView.Resources>
+                                <Style TargetType="ListViewItem">
+                                    <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
+                                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="ListViewItem_PreviewMouseRightButtonDown"/>
+                                    <Setter Property="ToolTip" Value="לחץ לחיצה כפולה לפתיחת הקובץ, לחיצה ימנית לפתיחת הנתיב"/>
+                                </Style>
+                            </ListView.Resources>
+
+                            <ListView.GroupStyle>
+                                <GroupStyle>
+                                    <GroupStyle.ContainerStyle>
+                                        <Style TargetType="{x:Type GroupItem}">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate>
+                                                        <Expander x:Name="ResultsExpander" IsExpanded="{Binding ElementName=ShowSnippetsToggleButton, Path=IsChecked, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+                                                            <Expander.Header>
+                                                                <TextBlock FontWeight="Bold" Foreground="Gray"  VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow">
+                                                                    <TextBlock.Text>
+                                                                        <MultiBinding StringFormat="{}({0}) - {1}">
+                                                                            <Binding Path="ItemCount"/>
+                                                                            <Binding Path="Name"/>
+                                                                        </MultiBinding>
+                                                                    </TextBlock.Text>
+                                                                </TextBlock>
+                                                            </Expander.Header>
+                                                            <ItemsPresenter />
+                                                        </Expander>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </GroupStyle.ContainerStyle>
+                                </GroupStyle>
+                            </ListView.GroupStyle>
+                        </ListView>
                     </Grid>
                 </TabItem>
 
@@ -161,13 +207,16 @@
                             <TreeView.Resources>
                                 <Style TargetType="TreeViewItem">
                                     <Setter Property="IsSelected" Value="{Binding IsSelected}" />
+                                    <EventSetter Event="MouseDoubleClick" Handler="TreeViewItem_MouseDoubleClick"/>
+                                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItem_PreviewMouseRightButtonDown"/>
+                                    <Setter Property="ToolTip" Value="לחץ לחיצה כפולה לפתיחת הקובץ, לחיצה ימנית לפתיחת הנתיב"/>
                                 </Style>
                             </TreeView.Resources>
                         </TreeView>
                     </Grid>
 
                 </TabItem>
-                <TabItem Header="הגדרות">
+                <!--<TabItem Header="הגדרות">
                     <StackPanel Style="{StaticResource SettingStackPanel}">
                         <StackPanel Margin="5" Orientation="Horizontal">
                             <TextBlock Text="מרחק בין מילים:" />
@@ -187,10 +236,10 @@
                             </Border>
                         </StackPanel>
                         <Separator />
-                        <!--<CheckBox Margin="5,10,5,10" Content="השתמש במנוע של וורד" />
-                        <Separator />-->
+                        --><!--<CheckBox Margin="5,10,5,10" Content="השתמש במנוע של וורד" />
+                        <Separator />--><!--
                     </StackPanel>
-                </TabItem>
+                </TabItem>-->
             </TabControl>
 
             <GridSplitter Grid.Column="1" />

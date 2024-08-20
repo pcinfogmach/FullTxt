@@ -224,6 +224,9 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Console, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Console.4.3.0\lib\net46\System.Console.dll</HintPath>
@@ -285,6 +288,9 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http, Version=4.1.1.3, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
       <Private>True</Private>
@@ -295,6 +301,9 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Reflection, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
       <Private>True</Private>
@@ -305,8 +314,8 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.3.0\lib\netstandard1.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Extensions, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.Extensions.4.3.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
@@ -377,6 +386,9 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
+    <Reference Include="XpdfNet, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\XpdfNet.1.2.0\lib\net45\XpdfNet.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -393,16 +405,26 @@
     <Compile Include="Helpers\BooleanToVisibilityConverter.cs" />
     <Compile Include="Helpers\Extensions.cs" />
     <Compile Include="Helpers\FileTypeDetector.cs" />
+    <Compile Include="Search\CostumHtmlHighlighter.cs" />
+    <Compile Include="Search\Tests\CostumeHighlighter3.cs" />
+    <Compile Include="Search\Tests\CustomQueryScorer2.cs" />
+    <Compile Include="Search\Tests\ExplanationParser.cs" />
+    <Compile Include="Search\Tests\FIndAllIndexes.cs" />
     <Compile Include="Helpers\HebrewMessageBox.cs" />
     <Compile Include="Helpers\ICommandBase.cs" />
     <Compile Include="Helpers\InotifyBase.cs" />
+    <Compile Include="Helpers\PaddingRightConverter.cs" />
     <Compile Include="Helpers\SubtractConverter.cs" />
     <Compile Include="Helpers\HtmlConverter.cs" />
     <Compile Include="Helpers\DocxTextExtractor.cs" />
+    <Compile Include="Search\CustomSimilarity.cs" />
+    <Compile Include="Search\Tests\CostumeHighlighter.cs" />
+    <Compile Include="Search\Tests\CostumeQuery.cs" />
     <Compile Include="Search\Fragmentor.cs" />
     <Compile Include="Search\HebrewAnalyzer.cs" />
     <Compile Include="Search\HebrewQueryParser.cs" />
     <Compile Include="Search\HtmlStrippingCharFilter.cs" />
+    <Compile Include="Search\IndexerLauncher.cs" />
     <Compile Include="Search\LuceneBase.cs" />
     <Compile Include="Search\LuceneIndexer.cs" />
     <Compile Include="Search\InMemoryLuceneSearch.cs" />
@@ -410,6 +432,16 @@
     <Compile Include="Search\LuceneSearch.cs" />
     <Compile Include="Search\ResultItem.cs" />
     <Compile Include="Search\SynynomsFetcher.cs" />
+    <Compile Include="Search\Tests\CustomHighlighter1.cs" />
+    <Compile Include="Search\Tests\CustomQueryScorer.cs" />
+    <Compile Include="Search\Tests\FindAllIndexes2.cs" />
+    <Compile Include="Search\Tests\FindAllIndexes3.cs" />
+    <Compile Include="Search\Tests\CostumeHighlighter4.cs" />
+    <Compile Include="Search\Tests\ICustomHighlighter.cs" />
+    <Compile Include="Search\Tests\SnippetBuilderBase.cs" />
+    <Compile Include="Search\Tests\TermAnalyzerWithSnippets.cs" />
+    <Compile Include="Search\Tests\TermAnalyzer.cs" />
+    <Compile Include="Search\Tests\Termanalyzer1.cs" />
     <Compile Include="Tree\TreeLoader.cs" />
     <Compile Include="Tree\TreeNode.cs" />
     <Page Include="FullTxtView.xaml">
@@ -467,9 +499,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\Lucene.Net.4.8.0-beta00016\analyzers\dotnet\cs\Lucene.Net.CodeAnalysis.CSharp.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\PdfiumViewer.WPF\src\PdfiumViewer\PdfiumViewer.csproj">
@@ -530,6 +559,9 @@
     </Content>
     <Resource Include="TextSeeker.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Lucene.Net.4.8.0-beta00016\analyzers\dotnet\cs\Lucene.Net.CodeAnalysis.CSharp.dll" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -537,5 +569,7 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.2646-prerelease\build\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('..\packages\XpdfNet.1.2.0\build\XpdfNet.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\XpdfNet.1.2.0\build\XpdfNet.targets'))" />
   </Target>
+  <Import Project="..\packages\XpdfNet.1.2.0\build\XpdfNet.targets" Condition="Exists('..\packages\XpdfNet.1.2.0\build\XpdfNet.targets')" />
 </Project>

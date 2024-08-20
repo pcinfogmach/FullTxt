@@ -1,6 +1,8 @@
-﻿using FullText.Tree;
+﻿using FullText.Search.Tests;
+using FullText.Tree;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Lucene.Net.Search.Spans;
 using Lucene.Net.Store;
 using System;
 using System.Collections.Generic;
@@ -16,57 +18,44 @@ namespace FullText.Search
     {
         public int slop = Properties.Settings.Default.DistanceBetweenSearchWords;
         public List<ResultItem> results = new List<ResultItem>();
+        int totalSum;
 
         public async Task<List<ResultItem>> Search(string queryText, List<TreeNode> checkedTreeNodes)
         {
-            return await Task.Run(() =>
+            results = new List<ResultItem>();
+            try
             {
-                results = new List<ResultItem>();
-                try
+                totalSum = 0;
+                return await Task.Run(() =>
                 {
+                    //try
+                    //{
                     using (var directory = FSDirectory.Open(new DirectoryInfo(indexPath)))
                     {
-                        IndexSearcher searcher = new IndexSearcher(DirectoryReader.Open(directory));
-                        var topDocs = PerformSearch(searcher, ref queryText, 2);
+                        IndexSearcher searcher = new IndexSearcher(DirectoryReader.Open(directory))
+                        {
+                            Similarity = new CustomSimilarity()
+                        };
+
+
+                        Query query = parser.ParseSpanQuery(queryText, slop);
+                        var topDocs = PerformSearch(query, searcher, ref queryText, 2);
 
                         foreach (var scoreDoc in topDocs.ScoreDocs)
                         {
-                            GetResults(queryText, checkedTreeNodes, searcher, scoreDoc.Doc);
+                            GetResults(query, queryText, checkedTreeNodes, searcher, scoreDoc.Doc);
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
 
-                return results;
-            });
-        }
-
-        void GetResults(string queryText, List<TreeNode> checkedTreeNodes, IndexSearcher searcher, int scoreDocId)
-        {
-            var path = searcher.Doc(scoreDocId).Get("Path");
-            var result = checkedTreeNodes.FirstOrDefault(node => node.Path == path);
-            if (result != null)
-            {
-                var snippets = Fragmentor.GetFragments(searcher, scoreDocId, parser.ParseSpanQuery(queryText, slop), analyzer);
-
-                foreach (var snippet in snippets)
-                {
-                    results.Add(new ResultItem
-                    {
-                        TreeNode = result,
-                        Snippet = snippet
-                    });
-                }
+                    return results;
+                });
             }
+            catch (Exception ex) { MessageBox.Show(ex.Message); return results; }
         }
 
-        public TopDocs PerformSearch(IndexSearcher searcher, ref string queryText, int fuzzyModifier)
+        public TopDocs PerformSearch(Query query, IndexSearcher searcher, ref string queryText, int fuzzyModifier)
         {
             TopDocs topDocs = null;
-            Lucene.Net.Search.Query query = parser.ParseSpanQuery(queryText, slop);
 
             topDocs = searcher.Search(query, int.MaxValue);
 
@@ -87,6 +76,31 @@ namespace FullText.Search
             }
 
             return topDocs;
+        }
+
+        void GetResults(Query query, string queryText, List<TreeNode> checkedTreeNodes, IndexSearcher searcher, int scoreDocId)
+        {
+            var path = searcher.Doc(scoreDocId).Get("Path");
+            var result = checkedTreeNodes.FirstOrDefault(node => node.Path == path);
+            if (result != null)
+            {
+                //var snippets = CustomHtmlHighlighter.GetSnippets(searcher, query, scoreDocId);
+                var snippets = Fragmentor.GetFragments(searcher, scoreDocId, parser.ParseSpanQuery(queryText, slop), analyzer);
+
+                for (int i = 0; i < snippets.Count; i++)
+                {
+                    totalSum++;
+                    results.Add(new ResultItem
+                    {
+                        TreeNode = result,
+                        GroupName = result.Name,
+                        Title = totalSum + ". " + result.Name,
+                        Snippet = snippets[i],
+                        ResultNumber = i,
+                        TotalRelativeResults = snippets.Count,
+                    });
+                }
+            }
         }
     }
 }

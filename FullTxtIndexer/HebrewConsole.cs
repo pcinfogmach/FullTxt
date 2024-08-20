@@ -12,8 +12,8 @@ namespace FullTxtIndexer
         static bool isHebrewEncoding;
         public static void WriteLine(string text)
         {
-            if (!isHebrewEncoding) { Console.OutputEncoding = Encoding.ASCII;  isHebrewEncoding = true; } 
-            HebrewConsole.WriteLine(text.ReverseHebrewCharacters());
+            if (!isHebrewEncoding) { Console.OutputEncoding = Encoding.GetEncoding("Windows-1255");  isHebrewEncoding = true; } 
+            Console.WriteLine(text.ReverseHebrewCharacters());
         }
     }
 

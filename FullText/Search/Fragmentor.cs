@@ -1,17 +1,17 @@
 ﻿using Lucene.Net.Search.Highlight;
 using Lucene.Net.Search;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Lucene.Net.Analysis;
+using Lucene.Net.Search.Similarities;
+using Lucene.Net.Search.Spans;
+using FullText.Search.Tests;
+using System.Collections.Generic;
 
 namespace FullText.Search
 {
     public static class Fragmentor
     {
-        public static string[] GetFragments(IndexSearcher searcher, int docId, Query query, Analyzer analyzer)
+        public static List<string> GetFragments(IndexSearcher searcher, int docId, Query query, Analyzer analyzer)
         {
             var reader = searcher.IndexReader;
             var scorer = new QueryScorer(query);
@@ -23,9 +23,14 @@ namespace FullText.Search
 
             var content = searcher.Doc(docId).Get("Content");
             var tokenStream = TokenSources.GetAnyTokenStream(reader, docId, "Content", analyzer);
-            var fragments = highlighter.GetBestTextFragments(tokenStream, content, false, 30); // 10 is the number of snippets
+            var fragments = highlighter.GetBestTextFragments(tokenStream, content, false, short.MaxValue);
+            return fragments.Where(fragment => fragment.Score > 0).Select(fragment => fragment.ToString()).ToList();
 
-            return fragments.Where(fragment => fragment.Score > 0).Select(fragment => fragment.ToString()).ToList().ToArray();
+            //var highlighter = new CustomHighlighter(query, analyzer, searcher, docId);
+            //List<string> fragments = highlighter.HighlightText("Content", 150);
+
+
+            //return fragments;
         }
     }
 }
