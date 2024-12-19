@@ -5,6 +5,10 @@ using System.Text.RegularExpressions;
 
 namespace FullText.Search
 {
+    public class htmltextreader: TextReader
+    {
+
+    }
     public class HtmlStrippingCharFilter : CharFilter
     {
         private readonly TextReader input;
